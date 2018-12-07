@@ -10,6 +10,7 @@ public protocol WebSocketTransportDelegate: AnyObject {
   func webSocketTransportDidConnect(_ webSocketTransport: WebSocketTransport)
   func webSocketTransportDidReconnect(_ webSocketTransport: WebSocketTransport)
   func webSocketTransport(_ webSocketTransport: WebSocketTransport, didDisconnectWithError error:Error?)
+  func webSocketTransport(_ webSocketTransport: WebSocketTransport, didReceiveMessage message: (payload: JSONObject?, error: Error?))
 }
 
 public extension WebSocketTransportDelegate {
@@ -18,6 +19,7 @@ public extension WebSocketTransportDelegate {
   func webSocketTransport(_ webSocketTransport: WebSocketTransport, didDisconnectWithError error:Error?) {}
   func webSocketTransport(_ webSocketTransport: WebSocketTransport, didReceivePingData: Data?) {}
   func webSocketTransport(_ webSocketTransport: WebSocketTransport, didReceivePongData: Data?) {}
+  func webSocketTransport(_ webSocketTransport: WebSocketTransport, didReceiveMessage message: (payload: JSONObject?, error: Error?)) {}
 }
 
 // MARK: - WebSocketTransport
@@ -51,9 +53,11 @@ public class WebSocketTransport {
   private var acked = false
 
   private var queue: [Int: String] = [:]
-  private var connectingPayload: GraphQLMap?
 
+  public var connectingPayload: GraphQLMap?
+  
   private var subscribers = [String: (Result<JSONObject, Error>) -> Void]()
+
   private var subscriptions : [String: String] = [:]
   let processingQueue = DispatchQueue(label: "com.apollographql.WebSocketTransport")
 
@@ -76,6 +80,12 @@ public class WebSocketTransport {
     }
   }
 
+  public var security: SSLTrustValidator? {
+    didSet {
+      websocket.security = security
+    }
+  }
+  
   /// Designated initializer
   ///
   /// - Parameters:
@@ -130,6 +140,14 @@ public class WebSocketTransport {
 
   public func ping(data: Data, completionHandler: (() -> Void)? = nil) {
     return websocket.write(ping: data, completion: completionHandler)
+  }
+
+  public func connect() {
+    websocket.connect()
+  }
+
+  public func disconnect() {
+    websocket.disconnect()
   }
 
   private func processMessage(text: String) {
@@ -201,6 +219,8 @@ public class WebSocketTransport {
                                               error: parseHandler.error,
                                               kind: .unprocessedMessage(text)))
       }
+
+      delegate?.webSocketTransport(self, didReceiveMessage: (payload: parseHandler.payload, error: parseHandler.error))
     }
   }
 
@@ -226,8 +246,9 @@ public class WebSocketTransport {
     print("WebSocketTransport::unprocessed event \(data)")
   }
 
-  public func initServer() {
+  public func initServer(reconnect: Bool = true) {
     processingQueue.async {
+      self.reconnect.value = reconnect
       self.acked = false
 
       if let str = OperationMessage(payload: self.connectingPayload, type: .connectionInit).rawMessage {
