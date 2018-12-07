@@ -132,6 +132,14 @@ public class WebSocketTransport {
     return websocket.write(ping: data, completion: completionHandler)
   }
 
+  public func connect() {
+    websocket.connect()
+  }
+
+  public func disconnect() {
+    websocket.disconnect()
+  }
+
   private func processMessage(text: String) {
     OperationMessage(serialized: text).parse { parseHandler in
       guard
