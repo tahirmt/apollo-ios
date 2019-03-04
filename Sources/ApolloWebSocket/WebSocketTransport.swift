@@ -62,6 +62,12 @@ public class WebSocketTransport {
     }
   }
 
+    public var security: SSLTrustValidator? {
+      didSet {
+        websocket.security = security
+      }
+    }
+  
   /// Designated initializer
   ///
   /// - Parameter request: The connection URLRequest
