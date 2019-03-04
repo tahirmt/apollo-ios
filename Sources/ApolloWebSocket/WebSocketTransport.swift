@@ -76,6 +76,12 @@ public class WebSocketTransport {
     }
   }
 
+  public var security: SSLTrustValidator? {
+    didSet {
+      websocket.security = security
+    }
+  }
+  
   /// Designated initializer
   ///
   /// - Parameters:
