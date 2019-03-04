@@ -60,6 +60,12 @@ public class WebSocketTransport {
       self.websocket.request.setValue(self.clientVersion, forHTTPHeaderField: "apollographql-client-version")
     }
   }
+
+    public var security: SSLTrustValidator? {
+      didSet {
+        websocket.security = security
+      }
+    }
   
   /// Designated initializer
   ///
