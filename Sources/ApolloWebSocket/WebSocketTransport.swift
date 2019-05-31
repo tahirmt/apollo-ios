@@ -193,7 +193,7 @@ public class WebSocketTransport {
                                               kind: .unprocessedMessage(text)))
       }
 
-      delegate?.webSocketTransport(self, didReceiveMessage: (payload: payload, error: error))
+      delegate?.webSocketTransport(self, didReceiveMessage: (payload: parseHandler.payload, error: parseHandler.error))
     }
   }
 
