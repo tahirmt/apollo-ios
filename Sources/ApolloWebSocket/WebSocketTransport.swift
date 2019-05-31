@@ -63,7 +63,7 @@ public class WebSocketTransport {
   let processingQueue = DispatchQueue(label: "com.apollographql.WebSocketTransport")
 
   private let sendOperationIdentifiers: Bool
-  private let reconnectionInterval: TimeInterval
+  public var reconnectionInterval: TimeInterval?
   private let allowSendingDuplicates: Bool
   fileprivate var reconnected = false
 
@@ -108,7 +108,7 @@ public class WebSocketTransport {
               clientVersion: String = WebSocketTransport.defaultClientVersion,
               sendOperationIdentifiers: Bool = false,
               reconnect: Bool = true,
-              reconnectionInterval: TimeInterval = 0.5,
+              reconnectionInterval: TimeInterval? = 0.5,
               allowSendingDuplicates: Bool = true,
               connectOnInit: Bool = true,
               connectingPayload: GraphQLMap? = [:],
@@ -211,6 +211,8 @@ public class WebSocketTransport {
                                               error: parseHandler.error,
                                               kind: .unprocessedMessage(text)))
       }
+
+      delegate?.webSocketTransport(self, didReceiveMessage: (payload: parseHandler.payload, error: parseHandler.error))
     }
   }
 
@@ -236,8 +238,9 @@ public class WebSocketTransport {
     print("WebSocketTransport::unprocessed event \(data)")
   }
 
-  public func initServer() {
+  public func initServer(reconnect: Bool = true) {
     processingQueue.async {
+      self.reconnect.value = reconnect
       self.acked = false
 
       if let str = OperationMessage(payload: self.connectingPayload, type: .connectionInit).rawMessage {
