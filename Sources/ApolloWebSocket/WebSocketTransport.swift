@@ -48,7 +48,7 @@ public class WebSocketTransport {
   private let processingQueue = DispatchQueue(label: "com.apollographql.WebSocketTransport")
   
   private let sendOperationIdentifiers: Bool
-  private let reconnectionInterval: TimeInterval
+  public var reconnectionInterval: TimeInterval?
   fileprivate let sequenceNumberCounter = Atomic<Int>(0)
   fileprivate var reconnected = false
 
@@ -85,7 +85,7 @@ public class WebSocketTransport {
               clientName: String = WebSocketTransport.defaultClientName,
               clientVersion: String = WebSocketTransport.defaultClientVersion,
               sendOperationIdentifiers: Bool = false,
-              reconnectionInterval: TimeInterval = 0.5,
+              reconnectionInterval: TimeInterval? = 0.5,
               connectingPayload: GraphQLMap? = [:],
               requestCreator: RequestCreator = ApolloRequestCreator()) {
     self.connectingPayload = connectingPayload
@@ -180,7 +180,7 @@ public class WebSocketTransport {
                                               kind: .unprocessedMessage(text)))
       }
 
-      delegate?.webSocketTransport(self, didReceiveMessage: (payload: payload, error: error))
+      delegate?.webSocketTransport(self, didReceiveMessage: (payload: parseHandler.payload, error: parseHandler.error))
     }
   }
   
@@ -205,7 +205,7 @@ public class WebSocketTransport {
   private func processMessage(socket: WebSocketClient, data: Data) {
     print("WebSocketTransport::unprocessed event \(data)")
   }
-  
+
   public func initServer(reconnect: Bool = true) {
     self.reconnect.value = reconnect
     self.acked = false
@@ -339,8 +339,8 @@ extension WebSocketTransport: WebSocketDelegate {
     
     self.delegate?.webSocketTransport(self, didDisconnectWithError: self.error.value)
     acked = false // need new connect and ack before sending
-    
-    if reconnect.value {
+
+    if reconnect.value, let reconnectionInterval = reconnectionInterval {
       DispatchQueue.main.asyncAfter(deadline: .now() + reconnectionInterval) {
         self.websocket.connect()
       }
