@@ -32,14 +32,16 @@ public var clientVersion: String
 > NOTE: Setting this won't override immediately if the socket is still connected, only on reconnection.
 
 ## Methods
-### `init(request:clientName:clientVersion:sendOperationIdentifiers:reconnectionInterval:connectingPayload:requestCreator:)`
+### `init(request:clientName:clientVersion:sendOperationIdentifiers:reconnect:reconnectionInterval:allowSendingDuplicates:connectingPayload:requestCreator:)`
 
 ```swift
 public init(request: URLRequest,
             clientName: String = WebSocketTransport.defaultClientName,
             clientVersion: String = WebSocketTransport.defaultClientVersion,
             sendOperationIdentifiers: Bool = false,
+            reconnect: Bool = true,
             reconnectionInterval: TimeInterval = 0.5,
+            allowSendingDuplicates: Bool = true,
             connectingPayload: GraphQLMap? = [:],
             requestCreator: RequestCreator = ApolloRequestCreator())
 ```
@@ -47,11 +49,13 @@ public init(request: URLRequest,
 > Designated initializer
 >
 > - Parameter request: The connection URLRequest
-> - Parameter clientName: The client name to use for this client. Defauls to `Self.defaultClientName`
+> - Parameter clientName: The client name to use for this client. Defaults to `Self.defaultClientName`
 > - Parameter clientVersion: The client version to use for this client. Defaults to `Self.defaultClientVersion`.
 > - Parameter sendOperationIdentifiers: Whether or not to send operation identifiers with operations. Defaults to false.
+> - Parameter reconnect: Whether to auto reconnect when websocket looses connection. Defaults to true.
 > - Parameter reconnectionInterval: How long to wait before attempting to reconnect. Defaults to half a second.
-> - Parameter connectingPayload: [optional] The payload to send on connection. Dfaults to an empty `GraphQLMap`.
+> - Parameter allowSendingDuplicates: Allow sending duplicate messages. Important when reconnected. Defaults to true.
+> - Parameter connectingPayload: [optional] The payload to send on connection. Defaults to an empty `GraphQLMap`.
 > - Parameter requestCreator: The request creator to use when serializing requests. Defaults to an `ApolloRequestCreator`.
 
 #### Parameters
@@ -59,11 +63,13 @@ public init(request: URLRequest,
 | Name | Description |
 | ---- | ----------- |
 | request | The connection URLRequest |
-| clientName | The client name to use for this client. Defauls to `Self.defaultClientName` |
+| clientName | The client name to use for this client. Defaults to `Self.defaultClientName` |
 | clientVersion | The client version to use for this client. Defaults to `Self.defaultClientVersion`. |
 | sendOperationIdentifiers | Whether or not to send operation identifiers with operations. Defaults to false. |
+| reconnect | Whether to auto reconnect when websocket looses connection. Defaults to true. |
 | reconnectionInterval | How long to wait before attempting to reconnect. Defaults to half a second. |
-| connectingPayload | [optional] The payload to send on connection. Dfaults to an empty `GraphQLMap`. |
+| allowSendingDuplicates | Allow sending duplicate messages. Important when reconnected. Defaults to true. |
+| connectingPayload | [optional] The payload to send on connection. Defaults to an empty `GraphQLMap`. |
 | requestCreator | The request creator to use when serializing requests. Defaults to an `ApolloRequestCreator`. |
 
 ### `isConnected()`
@@ -78,10 +84,10 @@ public func isConnected() -> Bool
 public func ping(data: Data, completionHandler: (() -> Void)? = nil)
 ```
 
-### `initServer(reconnect:)`
+### `initServer()`
 
 ```swift
-public func initServer(reconnect: Bool = true)
+public func initServer()
 ```
 
 ### `closeConnection()`

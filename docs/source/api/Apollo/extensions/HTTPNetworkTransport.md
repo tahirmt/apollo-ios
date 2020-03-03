@@ -1,6 +1,9 @@
 **EXTENSION**
 
 # `HTTPNetworkTransport`
+```swift
+extension HTTPNetworkTransport: NetworkTransport
+```
 
 ## Methods
 ### `send(operation:completionHandler:)`
@@ -19,7 +22,9 @@ public func send<Operation>(operation: Operation, completionHandler: @escaping (
 ### `upload(operation:files:completionHandler:)`
 
 ```swift
-public func upload<Operation>(operation: Operation, files: [GraphQLFile], completionHandler: @escaping (_ result: Result<GraphQLResponse<Operation>, Error>) -> Void) -> Cancellable
+public func upload<Operation>(operation: Operation,
+                              files: [GraphQLFile],
+                              completionHandler: @escaping (_ result: Result<GraphQLResponse<Operation>, Error>) -> Void) -> Cancellable
 ```
 
 #### Parameters

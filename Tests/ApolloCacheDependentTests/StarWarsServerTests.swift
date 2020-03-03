@@ -29,10 +29,11 @@ class APQsWithGetMethodConfig: TestConfig, HTTPNetworkTransportRetryDelegate{
   }
   
   func network() -> HTTPNetworkTransport {
-    return HTTPNetworkTransport(url: URL(string: "http://localhost:8080/graphql")!,
+    let transport = HTTPNetworkTransport(url: URL(string: "http://localhost:8080/graphql")!,
                                 enableAutoPersistedQueries: true,
-                                useGETForPersistedQueryRetry: true,
-                                delegate: self)
+                                useGETForPersistedQueryRetry: true)
+    transport.delegate = self
+    return transport
   }
   
 }
@@ -51,10 +52,14 @@ class StarWarsServerAPQsTests: StarWarsServerTests {
   }
 }
 
-class StarWarsServerTests: XCTestCase {
+class StarWarsServerTests: XCTestCase, CacheTesting {
   // MARK: Queries
   var config: TestConfig!
 
+  var cacheType: TestCacheProvider.Type {
+    InMemoryTestCacheProvider.self
+  }
+  
   override func setUp() {
     super.setUp()
     config = DefaultConfig()
