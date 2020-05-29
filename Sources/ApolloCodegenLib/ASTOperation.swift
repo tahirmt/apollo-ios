@@ -1,7 +1,7 @@
 import Foundation
 
 /// The representation of a single operation defined in a .graphql file.
-class ASTOperation: Codable {
+struct ASTOperation: Codable, Equatable {
   
   /// The available types of operation
   enum OperationType: String, Codable {
@@ -11,12 +11,12 @@ class ASTOperation: Codable {
   }
   
   /// A variable in an operation
-  class Variable: Codable {
+  struct Variable: Codable, Equatable {
     /// The name of the variable
     let name: String
     
     /// The type of the variable
-    let type: ASTVariableType
+    let typeNode: ASTVariableType
   }
 
   /// The full file path to the file where this operation was defined on the filesystem where the AST was generated.

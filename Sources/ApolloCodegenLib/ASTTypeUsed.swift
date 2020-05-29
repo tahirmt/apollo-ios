@@ -1,20 +1,20 @@
 import Foundation
 
 /// A type to generate code for.
-class ASTTypeUsed: Codable {
+struct ASTTypeUsed: Codable, Equatable {
   
-  class Field: Codable {
+  struct Field: Codable, Equatable {
     // The name of the field
     let name: String
     
     /// The type of the field
-    let type: ASTVariableType
+    let typeNode: ASTVariableType
     
     /// [optional] A description of the field.
     let description: String?
   }
-  
-  /// TODO What are the other possible kinds?
+
+  /// The possible kinds which could be returned through this mechanism
   enum Kind: String, Codable {
     case EnumType
     case InputObjectType
@@ -24,11 +24,13 @@ class ASTTypeUsed: Codable {
   
   /// The name of the type
   let name: String
-  
+
   /// The description of the type
   let description: String
+
+  /// [optional] The values of an enum type
   let values: [ASTEnumValue]?
-  
+
   /// [optional] Any fields used on this type
   let fields: [ASTTypeUsed.Field]?
 }

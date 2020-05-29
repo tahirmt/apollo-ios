@@ -31,6 +31,22 @@ public var clientVersion: String
 
 > NOTE: Setting this won't override immediately if the socket is still connected, only on reconnection.
 
+### `security`
+
+```swift
+public var security: SSLTrustValidator?
+```
+
+### `enableSOCKSProxy`
+
+```swift
+public var enableSOCKSProxy: Bool
+```
+
+> Determines whether a SOCKS proxy is enabled on the underlying request.
+> Mostly useful for debugging with tools like Charles Proxy.
+> Note: Will return `false` from the getter and no-op the setter for implementations that do not conform to `SOCKSProxyable`.
+
 ## Methods
 ### `init(request:clientName:clientVersion:sendOperationIdentifiers:reconnect:reconnectionInterval:allowSendingDuplicates:connectingPayload:requestCreator:)`
 
@@ -106,4 +122,16 @@ deinit
 
 ```swift
 public func unsubscribe(_ subscriptionId: String)
+```
+
+### `updateHeaderValues(_:)`
+
+```swift
+public func updateHeaderValues(_ values: [String: String?])
+```
+
+### `updateConnectingPayload(_:)`
+
+```swift
+public func updateConnectingPayload(_ payload: GraphQLMap)
 ```

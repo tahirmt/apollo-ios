@@ -7,7 +7,6 @@ import Apollo
 public enum SQLiteNormalizedCacheError: Error {
   case invalidRecordEncoding(record: String)
   case invalidRecordShape(object: Any)
-  case invalidRecordValue(value: Any)
 }
 
 /// A `NormalizedCache` implementation which uses a SQLite database to store data.
@@ -149,7 +148,7 @@ extension SQLiteNormalizedCache: NormalizedCache {
   public func clear(callbackQueue: DispatchQueue?, completion: ((Swift.Result<Void, Error>) -> Void)?) {
     let result: Swift.Result<Void, Error>
     do {
-      try self.clearRecords()
+      try clearImmediately()
       result = .success(())
     } catch {
       result = .failure(error)
@@ -158,5 +157,9 @@ extension SQLiteNormalizedCache: NormalizedCache {
     DispatchQueue.apollo_returnResultAsyncIfNeeded(on: callbackQueue,
                                                    action: completion,
                                                    result: result)
+  }
+
+  public func clearImmediately() throws {
+    try clearRecords()
   }
 }

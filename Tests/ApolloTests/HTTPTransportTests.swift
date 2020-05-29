@@ -35,10 +35,10 @@ class HTTPTransportTests: XCTestCase {
     return transport
   }()
   
-  private func validateHeroNameQueryResponse<Operation: GraphQLOperation>(result: Result<GraphQLResponse<Operation>, Error>,
-                                                                          expectation: XCTestExpectation,
-                                                                          file: StaticString = #file,
-                                                                          line: UInt = #line) {
+  private func validateHeroNameQueryResponse<Data: GraphQLSelectionSet>(result: Result<GraphQLResponse<Data>, Error>,
+                                                                        expectation: XCTestExpectation,
+                                                                        file: StaticString = #file,
+                                                                        line: UInt = #line) {
     defer {
       expectation.fulfill()
     }
@@ -190,12 +190,82 @@ class HTTPTransportTests: XCTestCase {
     self.wait(for: [expectation], timeout: 10)
   }
   
+  func testRetryDelegateReturnsApolloError() throws {
+    class MockRetryDelegate: HTTPNetworkTransportRetryDelegate {
+      func networkTransport(_ networkTransport: HTTPNetworkTransport,
+                            receivedError error: Error,
+                            for request: URLRequest,
+                            response: URLResponse?,
+                            continueHandler: @escaping (HTTPNetworkTransport.ContinueAction) -> Void) {
+        continueHandler(.fail(error))
+      }
+    }
+    
+    let mockRetryDelegate = MockRetryDelegate()
+    
+    let transport = HTTPNetworkTransport(url: URL(string: "http://localhost:8080/graphql_non_existant")!)
+    transport.delegate = mockRetryDelegate
+    
+    let expectationErrorResponse = self.expectation(description: "Send operation completed")
+    
+    let _ = transport.send(operation: HeroNameQuery()) { result in
+      switch result {
+      case .success:
+        XCTFail()
+        expectationErrorResponse.fulfill()
+      case .failure(let error):
+        XCTAssertTrue(error is GraphQLHTTPResponseError)
+        expectationErrorResponse.fulfill()
+      }
+    }
+    
+    wait(for: [expectationErrorResponse], timeout: 1)
+  }
+  
+  func testRetryDelegateReturnsCustomError() throws {
+    enum MockError: Error, Equatable {
+      case customError
+    }
+    
+    class MockRetryDelegate: HTTPNetworkTransportRetryDelegate {
+      func networkTransport(_ networkTransport: HTTPNetworkTransport,
+                            receivedError error: Error,
+                            for request: URLRequest,
+                            response: URLResponse?,
+                            continueHandler: @escaping (HTTPNetworkTransport.ContinueAction) -> Void) {
+        continueHandler(.fail(MockError.customError))
+      }
+    }
+    
+    let mockRetryDelegate = MockRetryDelegate()
+    
+    let transport = HTTPNetworkTransport(url: URL(string: "http://localhost:8080/graphql_non_existant")!)
+    transport.delegate = mockRetryDelegate
+    
+    let expectationErrorResponse = self.expectation(description: "Send operation completed")
+    
+    let _ = transport.send(operation: HeroNameQuery()) { result in
+      switch result {
+      case .success:
+        XCTFail()
+        expectationErrorResponse.fulfill()
+      case .failure(let error):
+        XCTAssertTrue(error is MockError)
+        expectationErrorResponse.fulfill()
+      }
+    }
+    
+    wait(for: [expectationErrorResponse], timeout: 1)
+  }
+  
   func testEquality() {
     let identicalTransport = HTTPNetworkTransport(url: self.url,
+                                                  client: self.networkTransport.client,
                                                   useGETForQueries: true)
     XCTAssertEqual(self.networkTransport, identicalTransport)
     
-    let nonIdenticalTransport = HTTPNetworkTransport(url: self.url)
+    let nonIdenticalTransport = HTTPNetworkTransport(url: self.url,
+                                                     client: self.networkTransport.client)
     XCTAssertNotEqual(self.networkTransport, nonIdenticalTransport)
   }
 
@@ -206,11 +276,11 @@ class HTTPTransportTests: XCTestCase {
     // TODO: Replace this with once it is codable https://github.com/apollographql/apollo-ios/issues/467
     let body = ["errors": [["message": "Test graphql error"]]]
 
-    let mockSession = MockURLSession()
-    mockSession.response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)
-    mockSession.data = try JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
+    let mockClient = MockURLSessionClient()
+    mockClient.response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)
+    mockClient.data = try JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
     let network = HTTPNetworkTransport(url: url,
-                                       session: mockSession)
+                                       client: mockClient)
     network.delegate = self
     let expectation = self.expectation(description: "Send operation completed")
 
@@ -223,7 +293,7 @@ class HTTPTransportTests: XCTestCase {
       }
     }
 
-    let request = try XCTUnwrap(mockSession.lastRequest,
+    let request = try XCTUnwrap(mockClient.lastRequest,
                                 "last request should not be nil")
     
     XCTAssertEqual(request.url?.host, network.url.host)
@@ -241,11 +311,11 @@ class HTTPTransportTests: XCTestCase {
     // TODO: Replace this with once it is codable https://github.com/apollographql/apollo-ios/issues/467
     let body = ["errors": []]
 
-    let mockSession = MockURLSession()
-    mockSession.response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)
-    mockSession.data = try JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
+    let mockClient = MockURLSessionClient()
+    mockClient.response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)
+    mockClient.data = try JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
     let network = HTTPNetworkTransport(url: url,
-                                       session: mockSession)
+                                       client: mockClient)
     network.delegate = self
     let expectation = self.expectation(description: "Send operation completed")
 
@@ -258,7 +328,7 @@ class HTTPTransportTests: XCTestCase {
       }
     }
 
-    let request = try XCTUnwrap(mockSession.lastRequest,
+    let request = try XCTUnwrap(mockClient.lastRequest,
                                 "last request should not be nil")
 
     XCTAssertEqual(request.url?.host, network.url.host)
@@ -269,13 +339,13 @@ class HTTPTransportTests: XCTestCase {
   }
   
   func testClientNameAndVersionHeadersAreSent() throws {
-    let mockSession = MockURLSession()
+    let mockClient = MockURLSessionClient()
     let network = HTTPNetworkTransport(url: self.url,
-                                       session: mockSession)
+                                       client: mockClient)
     let query = HeroNameQuery(episode: .empire)
     let _ = network.send(operation: query) { _ in }
     
-    let request = try XCTUnwrap(mockSession.lastRequest,
+    let request = try XCTUnwrap(mockClient.lastRequest,
                                 "last request should not be nil")
     
     let clientName = try XCTUnwrap(request.value(forHTTPHeaderField: HTTPNetworkTransport.headerFieldNameApolloClientName),
@@ -340,9 +410,9 @@ extension HTTPTransportTests: HTTPNetworkTransportRetryDelegate {
                         receivedError error: Error,
                         for request: URLRequest,
                         response: URLResponse?,
-                        retryHandler: @escaping (Bool) -> Void) {
+                        continueHandler: @escaping (HTTPNetworkTransport.ContinueAction) -> Void) {
     guard let graphQLError = error as? GraphQLHTTPResponseError else {
-      retryHandler(false)
+      continueHandler(.fail(error))
       return
     }
     
@@ -352,12 +422,12 @@ extension HTTPTransportTests: HTTPNetworkTransportRetryDelegate {
       if retryCount > 1 {
         self.shouldModifyURLInWillSend = false
       }
-      retryHandler(true)
+      continueHandler(.retry)
     case .invalidResponse:
-      retryHandler(false)
+      continueHandler(.fail(error))
     case .persistedQueryNotFound,
          .persistedQueryNotSupported:
-      retryHandler(false)
+      continueHandler(.fail(error))
     }
   }
 }

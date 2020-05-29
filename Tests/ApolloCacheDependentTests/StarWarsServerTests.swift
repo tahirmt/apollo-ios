@@ -9,22 +9,25 @@ protocol TestConfig {
 }
 
 class DefaultConfig: TestConfig {
+  let transport =  HTTPNetworkTransport(url: URL(string: "http://localhost:8080/graphql")!)
   func network() -> HTTPNetworkTransport {
-    return HTTPNetworkTransport(url: URL(string: "http://localhost:8080/graphql")!)
+    return transport
   }
 }
 
 class APQsConfig: TestConfig {
+  let transport = HTTPNetworkTransport(url: URL(string: "http://localhost:8080/graphql")!,
+                                       enableAutoPersistedQueries: true)
   func network() -> HTTPNetworkTransport {
-    return HTTPNetworkTransport(url: URL(string: "http://localhost:8080/graphql")!,
-                                enableAutoPersistedQueries: true)
+    return transport
   }
 }
 
 class APQsWithGetMethodConfig: TestConfig, HTTPNetworkTransportRetryDelegate{
+  
   var alreadyRetried = false
-  func networkTransport(_ networkTransport: HTTPNetworkTransport, receivedError error: Error, for request: URLRequest, response: URLResponse?, retryHandler: @escaping (Bool) -> Void) {
-    retryHandler(!alreadyRetried)
+  func networkTransport(_ networkTransport: HTTPNetworkTransport, receivedError error: Error, for request: URLRequest, response: URLResponse?, continueHandler: @escaping (HTTPNetworkTransport.ContinueAction) -> Void) {
+    continueHandler(!alreadyRetried ? .retry : .fail(error))
     alreadyRetried = true
   }
   

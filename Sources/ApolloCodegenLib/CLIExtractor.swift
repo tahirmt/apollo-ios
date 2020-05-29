@@ -1,7 +1,9 @@
 import Foundation
 
+// Only available on macOS
+#if os(macOS)
+
 /// Helper for extracting and validating the node-based Apollo CLI from a zip.
-@available(OSX, message: "Only available on macOS")
 struct CLIExtractor {
   
   // MARK: - Extracting the binary
@@ -23,7 +25,7 @@ struct CLIExtractor {
     }
   }
   
-  static let expectedSHASUM = "bf98280b7164fbb2cd6fa04a9e7869d59798b9717ebee7650c365b920f566c59"
+  static let expectedSHASUM = "0b11aa7973afed9a6b66fbff8c4a09421068a3fe0f50975f7c5d4ca791236b0c"
   
   /// Checks to see if the CLI has already been extracted and is the correct version, and extracts or re-extracts as necessary
   ///
@@ -33,22 +35,22 @@ struct CLIExtractor {
   static func extractCLIIfNeeded(from cliFolderURL: URL, expectedSHASUM: String = CLIExtractor.expectedSHASUM) throws -> URL {
     let apolloFolderURL = ApolloFilePathHelper.apolloFolderURL(fromCLIFolder: cliFolderURL)
     
-    guard FileManager.default.apollo_folderExists(at: apolloFolderURL) else {
+    guard FileManager.default.apollo.folderExists(at: apolloFolderURL) else {
       CodegenLogger.log("Apollo folder doesn't exist, extracting CLI from zip file.")
       return try self.extractCLIFromZip(cliFolderURL: cliFolderURL)
     }
     
     guard try self.validateSHASUMInExtractedFile(apolloFolderURL: apolloFolderURL, expected: expectedSHASUM) else {
       CodegenLogger.log("SHASUM of extracted zip does not match expected, deleting existing folder and re-extracting.")
-      try FileManager.default.apollo_deleteFolder(at: apolloFolderURL)
+      try FileManager.default.apollo.deleteFolder(at: apolloFolderURL)
       return try self.extractCLIFromZip(cliFolderURL: cliFolderURL)
     }
     
     let binaryFolderURL = ApolloFilePathHelper.binaryFolderURL(fromApollo: apolloFolderURL)
     let binaryURL = ApolloFilePathHelper.binaryURL(fromBinaryFolder: binaryFolderURL)
-    guard FileManager.default.apollo_fileExists(at: binaryURL) else {
+    guard FileManager.default.apollo.fileExists(at: binaryURL) else {
       CodegenLogger.log("There was a valid `.shasum` file, but no binary at the expected path. Deleting existing apollo folder and re-extracting.", logLevel: .warning)
-      try FileManager.default.apollo_deleteFolder(at: apolloFolderURL)
+      try FileManager.default.apollo.deleteFolder(at: apolloFolderURL)
       return try self.extractCLIFromZip(cliFolderURL: cliFolderURL, expectedSHASUM: expectedSHASUM)
     }
     
@@ -63,7 +65,7 @@ struct CLIExtractor {
   /// - Returns: true if the shasums match, false if not.
   static func validateSHASUMInExtractedFile(apolloFolderURL: URL, expected: String = CLIExtractor.expectedSHASUM) throws -> Bool {
     let shasumFileURL = ApolloFilePathHelper.shasumFileURL(fromApollo: apolloFolderURL)
-    guard FileManager.default.apollo_fileExists(at: shasumFileURL) else {
+    guard FileManager.default.apollo.fileExists(at: shasumFileURL) else {
       return false
     }
     
@@ -97,12 +99,12 @@ struct CLIExtractor {
     try self.validateZipFileSHASUM(at: zipFileURL, expected: expectedSHASUM)
     
     CodegenLogger.log("Extracting CLI from zip file. This may take a second...")
-    _ = try Basher.run(command: "tar xzf \(zipFileURL.path) -C \(cliFolderURL.path)", from: nil)
+    _ = try Basher.run(command: "tar xzf '\(zipFileURL.path)' -C '\(cliFolderURL.path)'", from: nil)
     
     let apolloFolderURL = ApolloFilePathHelper.apolloFolderURL(fromCLIFolder: cliFolderURL)
     let binaryFolderURL = ApolloFilePathHelper.binaryFolderURL(fromApollo: apolloFolderURL)
     
-    guard FileManager.default.apollo_folderExists(at: binaryFolderURL) else {
+    guard FileManager.default.apollo.folderExists(at: binaryFolderURL) else {
       throw CLIExtractorError.noBinaryFolderAfterUnzipping(atURL: binaryFolderURL)
     }
     
@@ -116,9 +118,12 @@ struct CLIExtractor {
   /// - Parameter zipFileURL: The url to the zip file containing the Apollo CLI.
   /// - Parameter expected: The expected SHASUM. Defaults to the real expected SHASUM. This parameter exists mostly for testing.
   static func validateZipFileSHASUM(at zipFileURL: URL, expected: String = CLIExtractor.expectedSHASUM) throws {
-    let shasum = try FileManager.default.apollo_shasum(at: zipFileURL)    
+    let shasum = try FileManager.default.apollo.shasum(at: zipFileURL)
+    print("SHASUM: \(shasum)")
     guard shasum == expected else {
       throw CLIExtractorError.zipFileHasInvalidSHASUM(expectedSHASUM: expected, gotSHASUM: shasum)
     }
   }
 }
+
+#endif

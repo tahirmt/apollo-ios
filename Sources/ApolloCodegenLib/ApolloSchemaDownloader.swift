@@ -1,7 +1,9 @@
 import Foundation
 
+// Only available on macOS
+#if os(macOS)
+
 /// A wrapper to facilitate downloading a schema with the Apollo node CLI
-@available(OSX, message: "Only available on macOS")
 public struct ApolloSchemaDownloader {
   
   /// Runs code generation from the given folder with the passed-in options
@@ -13,9 +15,11 @@ public struct ApolloSchemaDownloader {
   @discardableResult
   public static func run(with cliFolderURL: URL,
                          options: ApolloSchemaOptions) throws -> String {
-    try FileManager.default.apollo_createContainingFolderIfNeeded(for: options.outputURL)
+    try FileManager.default.apollo.createContainingFolderIfNeeded(for: options.outputURL)
     
     let cli = try ApolloCLI.createCLI(cliFolderURL: cliFolderURL, timeout: options.downloadTimeout)
     return try cli.runApollo(with: options.arguments)
   }
 }
+
+#endif

@@ -1,12 +1,12 @@
 import Foundation
 
 /// A resuable fragment to generate code for
-class ASTFragment: Codable {
+struct ASTFragment: Codable, Equatable {
   /// The primary type the fragment is defined on
-  let typeCondition: ASTVariableType
+  let typeCondition: String
   
   /// All possible types that fragment could represent, if for instance the primary type is a Union or an Interface.
-  let possibleTypes: [ASTVariableType]
+  let possibleTypes: [String]
   
   /// The name of the fragment
   let fragmentName: String
@@ -28,12 +28,12 @@ class ASTFragment: Codable {
 }
 
 /// A fragment defined inline on a particuar object type such as `... on Droid { name }`
-class ASTInlineFragment: Codable {
+struct ASTInlineFragment: Codable, Equatable {
   /// The primary type the fragment is defined on
-  let typeCondition: ASTVariableType
+  let typeCondition: String
   
   /// All possible types that fragment could represent, if for instance the primary type is a Union or an Interface.
-  let possibleTypes: [ASTVariableType]
+  let possibleTypes: [String]
   
   /// The fields requested in this fragment
   let fields: [ASTField]

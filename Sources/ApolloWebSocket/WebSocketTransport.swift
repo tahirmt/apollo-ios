@@ -67,12 +67,37 @@ public class WebSocketTransport {
     }
   }
 
-    public var security: SSLTrustValidator? {
-      didSet {
-        websocket.security = security
-      }
+  public var security: SSLTrustValidator? {
+    get {
+      return websocket.security
     }
-  
+    set {
+      websocket.security = newValue
+    }
+  }
+
+  /// Determines whether a SOCKS proxy is enabled on the underlying request.
+  /// Mostly useful for debugging with tools like Charles Proxy.
+  /// Note: Will return `false` from the getter and no-op the setter for implementations that do not conform to `SOCKSProxyable`.
+  public var enableSOCKSProxy: Bool {
+    get {
+      guard let socket = self.websocket as? SOCKSProxyable else {
+        // If it's not proxyable, then the proxy can't be enabled
+        return false
+      }
+      
+      return socket.enableSOCKSProxy
+    }
+    set {
+      guard var socket = self.websocket as? SOCKSProxyable else {
+        // If it's not proxyable, there's nothing to do here.
+        return
+      }
+      
+      socket.enableSOCKSProxy = newValue
+    }
+  }
+
   /// Designated initializer
   ///
   /// - Parameter request: The connection URLRequest
@@ -290,12 +315,35 @@ public class WebSocketTransport {
       self.subscriptions.removeValue(forKey: subscriptionId)
     }
   }
+
+  public func updateHeaderValues(_ values: [String: String?]) {
+    for (key, value) in values {
+      self.websocket.request.setValue(value, forHTTPHeaderField: key)
+    }
+
+    self.reconnectWebSocket()
+  }
+
+  public func updateConnectingPayload(_ payload: GraphQLMap) {
+    self.connectingPayload = payload
+    self.reconnectWebSocket()
+  }
+
+  private func reconnectWebSocket() {
+    let oldReconnectValue = reconnect.value
+    self.reconnect.value = false
+
+    self.websocket.disconnect()
+    self.websocket.connect()
+
+    reconnect.value = oldReconnectValue
+  }
 }
 
 // MARK: - HTTPNetworkTransport conformance
 
 extension WebSocketTransport: NetworkTransport {
-  public func send<Operation>(operation: Operation, completionHandler: @escaping (_ result: Result<GraphQLResponse<Operation>,Error>) -> Void) -> Cancellable {
+  public func send<Operation: GraphQLOperation>(operation: Operation, completionHandler: @escaping (_ result: Result<GraphQLResponse<Operation.Data>,Error>) -> Void) -> Cancellable {
     if let error = self.error.value {
       completionHandler(.failure(error))
       return EmptyCancellable()

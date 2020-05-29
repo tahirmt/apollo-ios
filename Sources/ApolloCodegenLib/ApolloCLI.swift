@@ -1,7 +1,9 @@
 import Foundation
 
+// Only available on macOS
+#if os(macOS)
+
 /// Wrapper for calling the bundled node-based Apollo CLI.
-@available(OSX, message: "Only available on macOS")
 public struct ApolloCLI {
   
   /// Creates an instance of `ApolloCLI`, downloading and extracting if needed
@@ -36,14 +38,16 @@ public struct ApolloCLI {
   public func runApollo(with arguments: [String],
                         from folder: URL? = nil) throws -> String {
     // Add the binary folder URL to $PATH so the script can find pre-compiled `node`
-    let command = "export PATH=$PATH:\(self.binaryFolderURL.path)" +
+    let command = "export PATH=$PATH:'\(self.binaryFolderURL.path)'" +
       // Log out the version for debugging purposes
-      " && \(self.scriptPath) --version" +
+      " && '\(self.scriptPath)' --version" +
       // Set the final command to log out the passed-in arguments for debugging purposes
       " && set -x" +
       // Actually run the script with the given options.
-      " && \(self.scriptPath) \(arguments.joined(separator: " "))"
+      " && '\(self.scriptPath)' \(arguments.joined(separator: " "))"
     
     return try Basher.run(command: command, from: folder)
   }
 }
+
+#endif

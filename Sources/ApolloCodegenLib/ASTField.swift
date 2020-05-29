@@ -1,10 +1,10 @@
 import Foundation
 
 /// A field with data on any item.
-class ASTField: Codable {
+struct ASTField: Codable, Equatable {
   
   /// An argument which can be passed along with a field
-  class Argument: Codable {
+  struct Argument: Codable, Equatable {
     /// The name of the argument
     let name: String
     
@@ -12,7 +12,7 @@ class ASTField: Codable {
     let value: JSONValue
     
     /// The type of the argument
-    let type: ASTVariableType
+    let typeNode: ASTVariableType
   }
   
   /// The name of the field that will come back in the response. Will generally be the same as `fieldName` unless aliased.
@@ -22,10 +22,13 @@ class ASTField: Codable {
   let fieldName: String
   
   /// The type of this field
-  let type: ASTVariableType
+  let typeNode: ASTVariableType
   
   /// If this field is conditional
   let isConditional: Bool
+  
+  /// [optional] Any conditions on this field
+  let conditions: [ASTCondition]?
   
   /// [optional] Any description of this field
   let description: String?

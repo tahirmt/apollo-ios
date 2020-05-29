@@ -1,7 +1,6 @@
 ---
 title: 7. Enable authentication
 ---
-
 import LoginUISetupPanel from "./components/login_ui_setup_panel.mdx"
 
 In this section, you'll add the ability to log in to the example server and obtain a token that your client can use to make identified requests.
@@ -14,7 +13,7 @@ In this section, you'll add the ability to log in to the example server and obta
 
 A **mutation** is an operation that changes state on your server. In this case, the mutation changes back-end state by creating a session tied to a particular user of your client.
 
-Open [GraphiQL](https://apollo-fullstack-tutorial.herokuapp.com/) and delete anything that's already in the left-hand panel. Open the Schema tab and select the `login` mutation:
+Open [GraphiQL](https://apollo-fullstack-tutorial.herokuapp.com/) and delete anything that's already in the left-hand panel. Open the Docs tab and select the `login` mutation:
 
 <img alt="The definition of login in the schema" class="screenshot" src="images/schema_login_definition.png"/>
 
@@ -225,7 +224,13 @@ With this code, once you log in successfully, the `LoginViewController` will aut
 
 Now, it's time to show the login view controller whenever someone attempts to book a trip without being logged in.
 
-In `DetailViewController.swift`, add a new method to determine whether the user is currently logged in: 
+At the top of `DetailViewController.swift`, import the `KeychainSwift` library:
+
+```swift:title=DetailViewController.swift
+import KeychainSwift
+```
+
+Then, add a new method to determine whether the user is currently logged in: 
 
 ```swift:title=DetailViewController.swift
 private func isLoggedIn() -> Bool {
@@ -250,7 +255,7 @@ Then, add a new method to determine what to do when the "Book now!" button is ta
     return
   }
     
-  if launch.isBooked == true {
+  if launch.isBooked {
     print("Cancel trip!")
   } else {
     print("Book trip!")

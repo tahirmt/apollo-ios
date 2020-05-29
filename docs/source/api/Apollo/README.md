@@ -57,17 +57,22 @@
 -   [MultipartFormData](classes/MultipartFormData/)
 -   [ReadTransaction](classes/ReadTransaction/)
 -   [ReadWriteTransaction](classes/ReadWriteTransaction/)
+-   [TaskData](classes/TaskData/)
+-   [URLSessionClient](classes/URLSessionClient/)
 
 ## Enums
 
 -   [ApolloClientError](enums/ApolloClientError/)
 -   [CachePolicy](enums/CachePolicy/)
+-   [ContinueAction](enums/ContinueAction/)
 -   [ErrorKind](enums/ErrorKind/)
+-   [GraphQLFileError](enums/GraphQLFileError/)
 -   [GraphQLHTTPRequestError](enums/GraphQLHTTPRequestError/)
 -   [GraphQLOperationType](enums/GraphQLOperationType/)
 -   [GraphQLOutputType](enums/GraphQLOutputType/)
 -   [JSONDecodingError](enums/JSONDecodingError/)
 -   [Source](enums/Source/)
+-   [URLSessionClientError](enums/URLSessionClientError/)
 
 ## Extensions
 

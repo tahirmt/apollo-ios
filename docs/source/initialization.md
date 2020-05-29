@@ -35,10 +35,20 @@ The available implementations are:
 
 The initializer for `HTTPNetworkTransport` has several properties which can allow you to get better information and finer-grained control of your HTTP requests and responses:
 
-- `session` allows you to pass in a custom `URLSession` to set up anything which needs to be done for every single request without alteration. This defaults to `URLSession.shared`. 
+- `client` allows you to pass in a [subclass of `URLSessionClient`](#the-urlsessionclient-class) to handle managing a background-compatible URL session, and set up anything which needs to be done for every single request without alteration. 
 - `sendOperationIdentifiers` allows you send operation identifiers along with your requests. **NOTE:** To send operation identifiers, Apollo types must be generated with `operationIdentifier`s or sending data will crash. Due to this restriction, this option defaults to `false`.
 - `useGETForQueries` sends all requests of `query` type using `GET` instead of `POST`. This defaults to `false` to preserve existing behavior in older versions of the client. 
 - `delegate` Can conform to one or many of several sub-protocols for `HTTPNetworkTransportDelegate`, detailed below.
+
+### The URLSessionClient class
+
+Since `URLSession` only supports use in the background using the delegate-based API, we have created our own `URLSessionClient` which handles the basics of setup for that. 
+
+One thing to be aware of: Because setting up a delegate is only possible in the initializer for `URLSession`, you can only pass in a `URLSessionConfiguration`, **not** an existing `URLSession`, to this class's initializer. 
+
+By default, instances of `URLSessionClient` use `URLSessionConfiguration.default` to set up their URL session, and instances of `HTTPNetworkTransport` use the default initializer for `URLSessionClient`.
+
+The `URLSessionClient` class and most of its methods are `open` so you can subclass it if you need to override any of the delegate methods for the `URLSession` delegates we're using or you need to handle additional delegate scenarios.  
 
 ### Using `HTTPNetworkTransportDelegate`
 
@@ -161,18 +171,24 @@ extension Network: HTTPNetworkTransportRetryDelegate {
                         receivedError error: Error,
                         for request: URLRequest,
                         response: URLResponse?,
-                        retryHandler: @escaping (_ shouldRetry: Bool) -> Void) {
+                        continueHandler: @escaping (_ action: HTTPNetworkTransport.ContinueAction) -> Void) {
     // Check if the error and/or response you've received are something that requires authentication
     guard UserManager.shared.requiresReAuthentication(basedOn: error, response: response) else {
       // This is not something this application can handle, do not retry.
-      retryHandler(false)
+      continueHandler(.fail(error))
       return
     }
     
     // Attempt to re-authenticate asynchronously
-    UserManager.shared.reAuthenticate { success in 
+    UserManager.shared.reAuthenticate { (reAuthenticateError: Error?) in 
       // If re-authentication succeeded, try again. If it didn't, don't.
-      retryHandler(success)
+      if let reAuthenticateError = reAuthenticateError {
+        continueHandler(.fail(reAuthenticateError)) // Will return re authenticate error to query callback 
+        // or (depending what error you want to get to callback)
+        continueHandler(.fail(error)) // Will return original error
+      } else {
+        continueHandler(.retry)
+      }
     }
   }
 }

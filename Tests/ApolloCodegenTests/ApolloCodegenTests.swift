@@ -42,17 +42,18 @@ class ApolloCodegenTests: XCTestCase {
       XCTFail("Nope, this should be a single file!")
     }
     XCTAssertFalse(options.omitDeprecatedEnumCases)
-    XCTAssertFalse(options.passthroughCustomScalars)
+    XCTAssertEqual(options.customScalarFormat, .none)
     XCTAssertEqual(options.urlToSchemaFile, schema)
+    XCTAssertEqual(options.modifier, .public)
     
     XCTAssertEqual(options.arguments, [
       "codegen:generate",
       "--target=swift",
       "--addTypename",
-      "--includes=./**/*.graphql",
-      "--localSchemaFile=\(schema.path)",
+      "--includes='./**/*.graphql'",
+      "--localSchemaFile='\(schema.path)'",
       "--mergeInFieldsFromFragmentSpreads",
-      output.path,
+      "'\(output.path)'",
     ])
   }
   
@@ -63,16 +64,18 @@ class ApolloCodegenTests: XCTestCase {
     let only = sourceRoot.appendingPathComponent("only.graphql")
     let operationIDsURL = sourceRoot.appendingPathComponent("operationIDs.json")
     let namespace = "ANameSpace"
+    let prefix = "MyPrefix"
     
     let options = ApolloCodegenOptions(codegenEngine: .swiftExperimental,
                                        includes: "*.graphql",
                                        mergeInFieldsFromFragmentSpreads: false,
+                                       modifier: .internal,
                                        namespace: namespace,
                                        omitDeprecatedEnumCases: true,
                                        only: only,
                                        operationIDsURL: operationIDsURL,
                                        outputFormat: .multipleFiles(inFolderAtURL: output),
-                                       passthroughCustomScalars: true,
+                                       customScalarFormat: .passthroughWithPrefix(prefix),
                                        urlToSchemaFile: schema)
     XCTAssertEqual(options.includes, "*.graphql")
     XCTAssertFalse(options.mergeInFieldsFromFragmentSpreads)
@@ -85,23 +88,25 @@ class ApolloCodegenTests: XCTestCase {
     case .multipleFiles(let folderURL):
       XCTAssertEqual(folderURL, output)
     }
-    XCTAssertTrue(options.passthroughCustomScalars)
+    XCTAssertEqual(options.customScalarFormat, .passthroughWithPrefix(prefix))
     XCTAssertEqual(options.urlToSchemaFile, schema)
     XCTAssertTrue(options.omitDeprecatedEnumCases)
+    XCTAssertEqual(options.modifier, .internal)
     
     
     XCTAssertEqual(options.arguments, [
       "codegen:generate",
-      "--target=json",
+      "--target=json-modern",
       "--addTypename",
-      "--includes=*.graphql",
-      "--localSchemaFile=\(schema.path)",
+      "--includes='*.graphql'",
+      "--localSchemaFile='\(schema.path)'",
       "--namespace=\(namespace)",
-      "--only=\(only.path)",
-      "--operationIdsPath=\(operationIDsURL.path)",
+      "--only='\(only.path)'",
+      "--operationIdsPath='\(operationIDsURL.path)'",
       "--omitDeprecatedEnumCases",
       "--passthroughCustomScalars",
-      output.path,
+      "--customScalarsPrefix='\(prefix)'",
+      "'\(output.path)'",
     ])
   }
   
@@ -124,8 +129,8 @@ class ApolloCodegenTests: XCTestCase {
       return
     }
     
-    XCTAssertTrue(FileManager.default.apollo_folderExists(at: outputFolder))
-    XCTAssertTrue(FileManager.default.apollo_fileExists(at: outputFile))
+    XCTAssertTrue(FileManager.default.apollo.folderExists(at: outputFolder))
+    XCTAssertTrue(FileManager.default.apollo.fileExists(at: outputFile))
     
     let contents = try FileManager.default.contentsOfDirectory(atPath: outputFolder.path)    
     XCTAssertEqual(contents.count, 1)
@@ -145,7 +150,7 @@ class ApolloCodegenTests: XCTestCase {
                               with: scriptFolderURL,
                               options: options)
     
-    XCTAssertTrue(FileManager.default.apollo_folderExists(at: outputFolder))
+    XCTAssertTrue(FileManager.default.apollo.folderExists(at: outputFolder))
     
     let contents = try FileManager.default.contentsOfDirectory(atPath: outputFolder.path)
     XCTAssertEqual(contents.count, 17)
