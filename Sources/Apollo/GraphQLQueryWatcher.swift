@@ -12,6 +12,8 @@ public final class GraphQLQueryWatcher<Query: GraphQLQuery>: Cancellable, Apollo
 
   private weak var fetching: Cancellable?
 
+  private let callbackQueue: DispatchQueue
+
   private var dependentKeys: Set<CacheKey>?
 
   /// Designated initializer
@@ -22,10 +24,12 @@ public final class GraphQLQueryWatcher<Query: GraphQLQuery>: Cancellable, Apollo
   ///   - resultHandler: The result handler to call with changes.
   public init(client: ApolloClientProtocol,
               query: Query,
+              callbackQueue: DispatchQueue = .main,
               resultHandler: @escaping GraphQLResultHandler<Query.Data>) {
     self.client = client
     self.query = query
     self.resultHandler = resultHandler
+    self.callbackQueue = callbackQueue
 
     client.store.subscribe(self)
   }
@@ -34,9 +38,6 @@ public final class GraphQLQueryWatcher<Query: GraphQLQuery>: Cancellable, Apollo
   public func refetch() {
     fetch(cachePolicy: .fetchIgnoringCacheData)
   }
-
-  // Watchers always call result handlers on the main queue.
-  private let callbackQueue: DispatchQueue = .main
 
   func fetch(cachePolicy: CachePolicy) {
     // Cancel anything already in flight before starting a new fetch
