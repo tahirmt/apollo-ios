@@ -62,7 +62,7 @@ public class WebSocketTransport {
   private let processingQueue = DispatchQueue(label: "com.apollographql.WebSocketTransport")
 
   private let sendOperationIdentifiers: Bool
-  public var reconnectionInterval: TimeInterval?
+  private let reconnectionInterval: TimeInterval
   private let allowSendingDuplicates: Bool
   fileprivate let sequenceNumberCounter = Atomic<Int>(0)
   fileprivate var reconnected = false
@@ -101,7 +101,7 @@ public class WebSocketTransport {
               clientVersion: String = WebSocketTransport.defaultClientVersion,
               sendOperationIdentifiers: Bool = false,
               reconnect: Bool = true,
-              reconnectionInterval: TimeInterval? = 0.5,
+              reconnectionInterval: TimeInterval = 0.5,
               allowSendingDuplicates: Bool = true,
               connectOnInit: Bool = true,
               connectingPayload: GraphQLMap? = [:],
