@@ -166,6 +166,11 @@ public final class WebSocket: NSObject, WebSocketClient, StreamDelegate, WebSock
 
   public var respondToPingWithPong: Bool = true
 
+  public var enableSOCKSProxy: Bool {
+    get { stream.enableSOCKSProxy }
+    set { stream.enableSOCKSProxy = newValue }
+  }
+
   // MARK: - Private
 
   private struct CompressionState {
