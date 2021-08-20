@@ -117,6 +117,43 @@ apollo.fetch(query: HeroAndFriendsNamesQuery(episode: .empire)) { result in
 
 Because the above query won't fetch `appearsIn`, this property is not part of the returned result type and cannot be accessed here.
 
+### Notes on working with Custom Scalars
+
+Custom scalars are types defined by your schema that are based on other GraphQL scalar types (such as `String` or `Int`). Without intervention, code generation will use the underlying types to generate code for the custom scalars. 
+
+If you want to use the custom scalars within your code, you must set `passthroughCustomScalars` to true either at the command line or using Swift Scripting. 
+
+Once you've done that, you can either create your own type locally or use a `typealias` to declare an equivilent. This is very, very frequently used with `Date` types. Please see the [Custom Scalar Playground Page](https://github.com/apollographql/apollo-client-swift-playground/blob/main/Apollo.playground/Pages/CustomScalars.xcplaygroundpage/Contents.swift) for a full example using a custom date type.
+
+#### JSON and other Custom Scalars with multiple return types
+
+Some custom scalars are set up to potentially return multiple types at runtime. This is not ideal since you lose type safety, but if you're using an API you don't have control over, there's often not a great alternative to this.
+
+When this happens, because you don't know the type that's coming in, you can't set up a single `typealias` for that scalar. Instead, you need to define some other way of instantiating your custom scalar object. 
+
+This happens most often with JSON, which can return either an array or a dictionary. Here's an example of how you can use an enum to allow dynamic-but-limited types to parse (with `CustomJSON` as a placeholder type name`): 
+
+```swift
+enum CustomJSON {
+  case dictionary([String: Any])
+  case array([Any])
+}
+
+extension CustomJSON: JSONDecodable {
+  init(jsonValue value: JSONValue) throws {
+    if let dict = value as? [String: Any] {
+      self = .dictionary(dict)
+    } else if let array = value as? [Any] {
+      self = .array(array)
+    } else {
+      throw JSONDecodingError.couldNotConvert(value: value, to: CustomJSON.self)
+    }
+  }
+}
+```
+
+Again, make sure to define this in a file that is outside of your generated code, or it will get overwritten. 
+
 ## Specifying a cache policy
 
 [This section has moved to the Caching documentation](/caching/). 
@@ -125,9 +162,9 @@ Because the above query won't fetch `appearsIn`, this property is not part of th
 
 By default, Apollo constructs queries and sends them to your graphql endpoint using `POST` with the JSON generated. 
 
-If you want Apollo to use `GET` instead, pass `true` to the optional `useGETForQueries` parameter when setting up your `HTTPNetworkTransport`. This will set up all queries conforming to `GraphQLQuery` sent through the HTTP transport to use `GET`. 
+If you want Apollo to use `GET` instead, pass `true` to the optional `useGETForQueries` parameter when setting up your `RequestChainNetworkTransport`. This will set up all queries conforming to `GraphQLQuery` sent through the HTTP transport to use `GET`.
 
->**NOTE:** This is a toggle which affects all queries sent through that client, so if you need to have certain queries go as `POST` and certain ones go as `GET`, you will likely have to swap out the `HTTPNetworkTransport`.
+>**NOTE:** This is a toggle which affects all queries sent through that client, so if you need to have certain queries go as `POST` and certain ones go as `GET`, you will likely have to swap out the `RequestChainNetworkTransport`.
 
 ## JSON serialization
 
@@ -160,9 +197,9 @@ To use APQs with the iOS SDK:
 - When generating your code, pass a local path for output for the `--operationIdsPath` (or pass a file URL to the `operationIDsURL` on `ApolloCodegenOptions` if using Swift Scripting).  
 
     This will generate a document with all your operations, but more importantly it will cause operation identifiers to be generated with your code. 
-- When creating your `ApolloClient`, make sure to manually instantiate your `HTTPNetworkTransport` and set `enableAutoPersistedQueries` and `sendOperationIdentifiers` to `true`.
+- When creating your `ApolloClient`, make sure to manually instantiate your `RequestChainNetworkTransport` and set `autoPersistQueries`.
 
-    This will cause the `HTTPNetworkTransport` to actively look for the "Oh no, I don't have this hash!" error from the server.
+    This will cause the `RequestChainNetworkTransport` to actively look for the "Oh no, I don't have this hash!" error from the server.
 
 By default, retries of queries will use `POST`.  If for some reason (for example, your queries are hitting a CDN that has considerably better performance with `GET`), you need to use a `GET` for the 2nd try of a query, make sure to set the `useGETForPersistedQueryRetry` option to `true`. Most users will want to leave this option as `false`. 
 

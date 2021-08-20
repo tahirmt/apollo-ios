@@ -1,20 +1,23 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.3
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "Codegen",
+    platforms: [
+        .macOS(.v10_14)
+    ],
     dependencies: [
         .package(name: "Apollo", path: ".."),
-        .package(url: "https://github.com/apple/swift-tools-support-core", from: "0.0.1"),
-        .package(url: "https://github.com/designatednerd/SourceDocs.git", .branch("master"))
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "0.3.0"),
+        .package(url: "https://github.com/eneko/SourceDocs.git", .upToNextMinor(from: "1.2.0"))
     ],
     targets: [
         .target(name: "Codegen",
                 dependencies: [
                     .product(name: "ApolloCodegenLib", package: "Apollo"),
-                    .product(name: "SwiftToolsSupport-auto", package: "swift-tools-support-core"),
+                    .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 ]),
         .target(name: "SchemaDownload",
                 dependencies: [

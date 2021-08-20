@@ -90,7 +90,7 @@ In most cases, the data available from a mutation result should be the server de
 ### An Important Caveat About File Uploads
 Apollo recommends only using GraphQL file uploading for proof-of-concept applications. While there is a spec we presently support for making `multipart-form` requests with GraphQL, we've found that in practice that it's much simpler to use more purpose-built tools for file upload.
 
-In practice, this means using a more traditional method to upload your file like REST `multipart-form` uploads or SDK's that support file uploads, such as AmazonS3. [This article covers how to do that with Typescript](https://blog.apollographql.com/%EF%B8%8F-graphql-file-uploads-with-react-hooks-typescript-amazon-s3-tutorial-ef39d21066a2), but the general theory for iOS works basically the same: 
+In practice, this means using a more traditional method to upload your file like REST `multipart-form` uploads or SDK's that support file uploads, such as AmazonS3. [This article covers how to do that with Typescript](https://www.apollographql.com/blog/graphql-file-uploads-with-react-hooks-typescript-amazon-s3-tutorial-ef39d21066a2), but the general theory for iOS works basically the same: 
 
 - Upload data **not** using GraphQL, getting back either an identifier or URL for the uploaded data.
 - Send that received identifier or URL to your graph using GraphQL.
@@ -105,7 +105,7 @@ At the moment, we only support uploads for a single operation, not for batch ope
 
 To upload a file, you will need: 
 
-- A `NetworkTransport` which also supports the `UploadingNetworkTransport` protocol on your `ApolloClient` instance. If you're using `HTTPNetworkTransport` (which is set up by default), this protocol is already supported. 
+- A `NetworkTransport` which also supports the `UploadingNetworkTransport` protocol on your `ApolloClient` instance. If you're using `RequestChainNetworkTransport` (which is set up by default), this protocol is already supported.
 - The correct `MIME` type for the data you're uploading. The default value is `application/octet-stream`. 
 - Either the data or the file URL of the data you want to upload. 
 - A mutation which takes an `Upload` as a parameter. Note that this must be supported by your server. 
@@ -127,7 +127,7 @@ If you wanted to use this to upload a file called `a.txt`, it would look somethi
 guard
   let fileURL = Bundle.main.url(forResource: "a", 
                                 withExtension: "txt"),
-  let file = GraphQLFile(fieldName: "file",   
+  let file = GraphQLFile(fieldName: "file", // Must be the name of the field the file is being uploaded to
                          originalName: "a.txt", 
                          mimeType: "text/plain", // <-defaults to "application/octet-stream"
                          fileURL: fileURL) else {
@@ -169,4 +169,4 @@ A few other notes:
     it will not. Generally you should be able to deconstruct upload objects to allow you to send the appropriate fields.
 
 - If you are uploading an array of files, you need to use the same field name for each file. These will be updated at send time.
-- If you are uploading an array of files, the array of `String`s passed into the query must be the same number as the array of files. 
+- If you are uploading an array of files, the array of `String`s passed into the query must be the same number as the array of files.

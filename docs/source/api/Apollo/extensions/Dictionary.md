@@ -6,12 +6,6 @@ public extension Dictionary
 ```
 
 ## Properties
-### `withNilValuesRemoved`
-
-```swift
-public var withNilValuesRemoved: Dictionary<String, JSONEncodable>
-```
-
 ### `jsonValue`
 
 ```swift
@@ -31,14 +25,8 @@ public var jsonObject: JSONObject
 static func += (lhs: inout Dictionary, rhs: Dictionary)
 ```
 
-### `evaluate(with:)`
+### `init(jsonValue:)`
 
 ```swift
-public func evaluate(with variables: [String: JSONEncodable]?) throws -> JSONValue
-```
-
-### `evaluate(with:)`
-
-```swift
-public func evaluate(with variables: [String: JSONEncodable]?) throws -> JSONObject
+public init(jsonValue value: JSONValue) throws
 ```

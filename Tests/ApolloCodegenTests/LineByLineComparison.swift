@@ -8,6 +8,7 @@
 
 import Foundation
 import XCTest
+import ApolloCodegenTestSupport
 
 struct LineByLineComparison {
     
@@ -23,7 +24,7 @@ struct LineByLineComparison {
   static func between(received: String,
                       expectedFileURL: URL,
                       trimImports: Bool = false,
-                      file: StaticString = #file,
+                      file: StaticString = #filePath,
                       line: UInt = #line) {
     guard FileManager.default.apollo.fileExists(at: expectedFileURL) else {
       XCTFail("File not found at \(expectedFileURL)",
@@ -65,14 +66,14 @@ struct LineByLineComparison {
   ///   - line: The line where this function is being called. Defaults to the direct caller
   static func between(received: String,
                       expected: String,
-                      file: StaticString = #file,
+                      file: StaticString = #filePath,
                       line: UInt = #line) {
     
     let receivedLines = received.components(separatedBy: "\n")
     let expectedLines = expected.components(separatedBy: "\n")
 
     guard receivedLines.count == expectedLines.count else {
-      XCTFail("Expected \(expectedLines.count) lines, received \(receivedLines.count) lines.\nExpected: \n\(expected)\nRecieved: \n\(received)",
+      XCTFail("Expected \(expectedLines.count) lines, received \(receivedLines.count) lines.\nExpected: \n\(expected)\nReceived: \n\(received)",
               file: file,
               line: line)
       return

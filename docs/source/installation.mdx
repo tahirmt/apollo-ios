@@ -38,7 +38,7 @@ You can install `Apollo.framework` into your project using any of the three majo
 
 You'll have to copy or [download a schema](/downloading-schema/) to your target's directory before generating code.
 
-Apollo iOS requires a GraphQL schema file as input to the code generation process. A schema file is a JSON file that contains the results of an an introspection query. Conventionally this file is called `schema.json`.
+Apollo iOS requires a GraphQL schema file as input to the code generation process. A schema file is a JSON file that contains the results of an introspection query. Conventionally this file is called `schema.json`.
 
 Note that you need to add this in the folder where most of your code is, NOT in the same folder where the `.xcodeproj` and/or `.xcworkspace` are located. Here is a rough ASCII representation of what this should look like: 
 
@@ -76,7 +76,7 @@ Code generation uses your `.graphql` files to generate API code that will help y
 
 The wrapper will call through to the included binaries and files that constitute the `apollo` command-line interface. This ensures that you can use our tooling without having to worry about NPM Version Hell™, and that the version of the framework you're using is compatible with the version of the codegen you're using.
 
-> 🚧 BETA ALERT 🚧 : Instead of writing the rest of this in Bash, try using our new [Swift Scripting Library](./swift-scripting), now in Beta! It supports downloading a schema and generating code.
+> 🎉 NEW SHINY ALERT 🎉 : Instead of writing the rest of this in Bash, try using our new [Swift Scripting Library](./swift-scripting), now in Beta! It supports downloading a schema and generating code. 
 
 The location of this wrapper script is slightly different based on how you've integrated Apollo into your project, but the first steps are the same everywhere: 
 

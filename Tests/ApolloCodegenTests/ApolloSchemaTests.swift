@@ -7,21 +7,22 @@
 //
 
 import XCTest
+import ApolloTestSupport
+import ApolloCodegenTestSupport
 @testable import ApolloCodegenLib
 
 class ApolloSchemaTests: XCTestCase {
-  
-  private lazy var endpointURL = URL(string: "http://localhost:8080/graphql")!
-  
-  func testCreatingOptionsWithDefaultParameters() throws {
+    
+  func testCreatingIntrospectionOptionsWithDefaultParameters() throws {
     let sourceRoot = CodegenTestHelper.sourceRootURL()
-    let options = ApolloSchemaOptions(endpointURL: self.endpointURL,
+    
+    let options = ApolloSchemaOptions(downloadMethod: .introspection(endpointURL: TestURL.mockPort8080.url),
                                       outputFolderURL: sourceRoot)
     
     let expectedOutputURL = sourceRoot.appendingPathComponent("schema.json")
-    XCTAssertEqual(options.endpointURL, self.endpointURL)
+    
+    XCTAssertEqual(options.downloadMethod, .introspection(endpointURL: TestURL.mockPort8080.url))
     XCTAssertEqual(options.outputURL, expectedOutputURL)
-    XCTAssertNil(options.apiKey)
     XCTAssertTrue(options.headers.isEmpty)
     
     XCTAssertEqual(options.arguments, [
@@ -30,22 +31,49 @@ class ApolloSchemaTests: XCTestCase {
         "'\(expectedOutputURL.path)'"
     ])
   }
-  
-  func testCreatingOptionsWithAllParameters() throws {
+
+  func testCreatingRegistryOptionsWithDefaultParameters() throws {
     let sourceRoot = CodegenTestHelper.sourceRootURL()
     let apiKey = "Fake_API_Key"
+    let graphID = "Fake_Graph_ID"
+    
+    let settings = ApolloSchemaOptions.DownloadMethod.RegistrySettings(apiKey: apiKey, graphID: graphID)
+    
+    let options = ApolloSchemaOptions(downloadMethod: .registry(settings),
+                                      outputFolderURL: sourceRoot)
+    
+    let expectedOutputURL = sourceRoot.appendingPathComponent("schema.json")
+    
+    XCTAssertEqual(options.downloadMethod, .registry(settings))
+    XCTAssertEqual(options.outputURL, expectedOutputURL)
+    XCTAssertTrue(options.headers.isEmpty)
+    
+    XCTAssertEqual(options.arguments, [
+        "client:download-schema",
+        "--key=\(apiKey)",
+        "--graph=\(graphID)",
+        "'\(expectedOutputURL.path)'"
+    ])
+  }
+
+  func testCreatingRegistryOptionsWithAllParameters() throws {
+    let sourceRoot = CodegenTestHelper.sourceRootURL()
+    let apiKey = "Fake_API_Key"
+    let graphID = "Fake_Graph_ID"
+    let variant = "Fake_Variant"
     let firstHeader = "Authorization: Bearer tokenGoesHere"
     let secondHeader = "Custom-Header: Custom_Customer"
     let headers = [firstHeader, secondHeader]
     
+    let settings = ApolloSchemaOptions.DownloadMethod.RegistrySettings(apiKey: apiKey,
+                                                                       graphID: graphID, variant: variant)
+    
     let options = ApolloSchemaOptions(schemaFileName: "different_name",
                                       schemaFileType: .schemaDefinitionLanguage,
-                                      apiKey: apiKey,
-                                      endpointURL: self.endpointURL,
+                                      downloadMethod: .registry(settings),
                                       headers: headers,
                                       outputFolderURL: sourceRoot)
-    XCTAssertEqual(options.apiKey, apiKey)
-    XCTAssertEqual(options.endpointURL, self.endpointURL)
+    XCTAssertEqual(options.downloadMethod, .registry(settings))
     XCTAssertEqual(options.headers, headers)
     
     let expectedOutputURL = sourceRoot.appendingPathComponent("different_name.graphql")
@@ -53,75 +81,12 @@ class ApolloSchemaTests: XCTestCase {
 
     XCTAssertEqual(options.arguments, [
         "client:download-schema",
-        "--endpoint=http://localhost:8080/graphql",
         "--key=\(apiKey)",
+        "--graph=\(graphID)",
+        "--variant=\(variant)",
         "'\(expectedOutputURL.path)'",
         "--header='\(firstHeader)'",
         "--header='\(secondHeader)'"
     ])
-  }
-  
-  func testDownloadingSchemaAsJSON() throws {
-    let testOutputFolderURL = CodegenTestHelper.outputFolderURL()
-    
-    let options = ApolloSchemaOptions(endpointURL: self.endpointURL,
-                                      outputFolderURL: testOutputFolderURL)
-    
-    // Delete anything existing at the output URL
-    try FileManager.default.apollo.deleteFile(at: options.outputURL)
-    XCTAssertFalse(FileManager.default.apollo.fileExists(at: options.outputURL))
-    
-    let cliFolderURL = CodegenTestHelper.cliFolderURL()
-
-    _ = try ApolloSchemaDownloader.run(with: cliFolderURL,
-                                       options: options)
-    
-    // Does the file now exist?
-    XCTAssertTrue(FileManager.default.apollo.fileExists(at: options.outputURL))
-    
-    // Is it non-empty?
-    let data = try Data(contentsOf: options.outputURL)
-    XCTAssertFalse(data.isEmpty)
-    
-    // Is it JSON?
-    let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data, options: []) as? [AnyHashable:Any])
-    
-    // Is it schema json?
-    _ = try XCTUnwrap(json["__schema"])
-    
-    // OK delete it now
-    try FileManager.default.apollo.deleteFile(at: options.outputURL)
-    XCTAssertFalse(FileManager.default.apollo.fileExists(at: options.outputURL))
-  }
-  
-  func testDownloadingSchemaInSchemaDefinitionLanguage() throws {
-    let testOutputFolderURL = CodegenTestHelper.outputFolderURL()
-    
-    let options = ApolloSchemaOptions(schemaFileType: .schemaDefinitionLanguage,
-                                      endpointURL: self.endpointURL,
-                                      outputFolderURL: testOutputFolderURL)
-    
-    // Delete anything existing at the output URL
-    try FileManager.default.apollo.deleteFile(at: options.outputURL)
-    XCTAssertFalse(FileManager.default.apollo.fileExists(at: options.outputURL))
-
-    let cliFolderURL = CodegenTestHelper.cliFolderURL()
-
-    print(try ApolloSchemaDownloader.run(with: cliFolderURL,
-                                         options: options))
-    
-    // Does the file now exist?
-    XCTAssertTrue(FileManager.default.apollo.fileExists(at: options.outputURL))
-    
-    // Is it non-empty?
-    let data = try Data(contentsOf: options.outputURL)
-    XCTAssertFalse(data.isEmpty)
-    
-    // It should not be JSON
-    XCTAssertNil(try? JSONSerialization.jsonObject(with: data, options: []) as? [AnyHashable:Any])
-    
-    // OK delete it now
-    try FileManager.default.apollo.deleteFile(at: options.outputURL)
-    XCTAssertFalse(FileManager.default.apollo.fileExists(at: options.outputURL))
   }
 }

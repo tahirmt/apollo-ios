@@ -14,15 +14,25 @@ let cliFolderURL = sourceRootURL
     .appendingPathComponent("SwiftScripts")
     .appendingPathComponent("ApolloCLI")
 
-let endpoint = URL(string: "http://localhost:8080/graphql")!
+let endpoint = URL(string: "http://localhost:4000/")!
 
 let output = sourceRootURL
     .appendingPathComponent("Sources")
-    .appendingPathComponent("StarWarsAPI")
+    .appendingPathComponent("UploadAPI")
 
-let options = ApolloSchemaOptions(schemaFileName: "downloaded_schema",
-                                  endpointURL: endpoint,
+// Introspection download:
+let options = ApolloSchemaOptions(schemaFileName: "schema",
+                                  downloadMethod: .introspection(endpointURL: endpoint),
                                   outputFolderURL: output)
+
+// Registry download:
+//let registrySettings = ApolloSchemaOptions.DownloadMethod.RegistrySettings(apiKey: <#Replace Me For Testing#>,
+//                                                                           graphID: "Apollo-Fullstack-8zo5jl")
+//
+//let options = ApolloSchemaOptions(schemaFileName: "schema",
+//                                  schemaFileType: .schemaDefinitionLanguage,
+//                                  downloadMethod: .registry(registrySettings),
+//                                  outputFolderURL: output)
 
 do {
     try ApolloSchemaDownloader.run(with: cliFolderURL,

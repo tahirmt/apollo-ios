@@ -15,7 +15,7 @@ Once those operations are generated, you can use an instance of `ApolloClient` u
 There are two different classes which conform to the [`NetworkTransport` protocol](api/Apollo/protocols/NetworkTransport/) within the `ApolloWebSocket` library: 
 
 - **`WebSocketTransport`** sends all operations over a web socket. 
-- **`SplitNetworkTransport`** hangs onto both a [`WebSocketTransport`](api/ApolloWebSocket/classes/WebSocketTransport/) instance and an [`UploadingNetworkTransport`](api/Apollo/protocols/UploadingNetworkTransport/) instance (usually [`HTTPNetworkTransport`](api/Apollo/classes/HTTPNetworkTransport/)) in order to create a single network transport that can use http for queries and mutations, and web sockets for subscriptions. 
+- **`SplitNetworkTransport`** hangs onto both a [`WebSocketTransport`](api/ApolloWebSocket/classes/WebSocketTransport/) instance and an [`UploadingNetworkTransport`](api/Apollo/protocols/UploadingNetworkTransport/) instance (usually [`RequestChainNetworkTransport`](api/Apollo/classes/RequestChainNetworkTransport/)) in order to create a single network transport that can use http for queries and mutations, and web sockets for subscriptions. 
 
 Typically, you'll want to use `SplitNetworkTransport`, since this allows you to retain the single `NetworkTransport` setup and avoids any potential issues of using multiple client objects. 
 
@@ -37,32 +37,36 @@ class Apollo {
   private lazy var webSocketTransport: WebSocketTransport = {
     let url = URL(string: "ws://localhost:8080/websocket")!
     let request = URLRequest(url: url)
-    return WebSocketTransport(request: request)
+    let webSocketClient = DefaultWebSocket(request: request)
+    return WebSocketTransport(websocket: webSocketClient)
   }()
   
   /// An HTTP transport to use for queries and mutations
-  private lazy var httpTransport: HTTPNetworkTransport = {
+  private lazy var normalTransport: RequestChainNetworkTransport = {
     let url = URL(string: "http://localhost:8080/graphql")!
-    return HTTPNetworkTransport(url: url)
+    return RequestChainNetworkTransport(interceptorProvider: DefaultInterceptorProvider(store: self.store), endpointURL: url)
   }()
 
-  /// A split network transport to allow the use of both of the above 
+  /// A split network transport to allow the use of both of the above
   /// transports through a single `NetworkTransport` instance.
   private lazy var splitNetworkTransport = SplitNetworkTransport(
-    httpNetworkTransport: self.httpTransport, 
+    uploadingNetworkTransport: self.normalTransport,
     webSocketNetworkTransport: self.webSocketTransport
   )
 
   /// Create a client using the `SplitNetworkTransport`.
-  private(set) lazy var client = ApolloClient(networkTransport: self.splitNetworkTransport)
+  private(set) lazy var client = ApolloClient(networkTransport: self.splitNetworkTransport, store: self.store)
+
+  /// A common store to use for `normalTransport` and `client`.
+  private lazy var store = ApolloStore()
 }
 ```
 
 ## Example usage of a subscription
 
-Let's say you're using the [Sample Star Wars API](https://github.com/apollographql/apollo-ios/blob/master/Tests/StarWarsAPI/API.swift), and you want to use a view controller with a `UITableView` to show a list of reviews that will automatically update whenever a new review is added. 
+Let's say you're using the [Sample Star Wars API](https://github.com/apollographql/apollo-ios/blob/main/Sources/StarWarsAPI/API.swift), and you want to use a view controller with a `UITableView` to show a list of reviews that will automatically update whenever a new review is added. 
 
-You can use the [`ReviewAddedSubscription`](https://github.com/apollographql/apollo-ios/blob/25f860e04c44f1099f509120b8c256433632d131/Tests/StarWarsAPI/API.swift#L5386) to accomplish this: 
+You can use the [`ReviewAddedSubscription`](https://github.com/apollographql/apollo-ios/blob/main/Sources/StarWarsAPI/API.swift#L5386) to accomplish this: 
 
 ```swift
 class ReviewViewController: UIViewController {
@@ -158,25 +162,29 @@ class Apollo {
   private lazy var webSocketTransport: WebSocketTransport = {
     let url = URL(string: "ws://localhost:8080/websocket")!
     let request = URLRequest(url: url)
+    let webSocketClient = DefaultWebSocket(request: request)
     let authPayload = ["authToken": magicToken]
-    return WebSocketTransport(request: request, connectingPayload: authPayload)
+    return WebSocketTransport(websocket: webSocketClient, connectingPayload: authPayload)
   }()
   
   /// An HTTP transport to use for queries and mutations.
-  private lazy var httpTransport: HTTPNetworkTransport = {
+  private lazy var normalTransport: RequestChainNetworkTransport = {
     let url = URL(string: "http://localhost:8080/graphql")!
-    return HTTPNetworkTransport(url: url)
+    return RequestChainNetworkTransport(interceptorProvider: DefaultInterceptorProvider(store: self.store), endpointURL: url)
   }()
 
-  /// A split network transport to allow the use of both of the above 
+  /// A split network transport to allow the use of both of the above
   /// transports through a single `NetworkTransport` instance.
   private lazy var splitNetworkTransport = SplitNetworkTransport(
-    httpNetworkTransport: self.httpTransport, 
+    uploadingNetworkTransport: self.normalTransport,
     webSocketNetworkTransport: self.webSocketTransport
   )
 
   /// Create a client using the `SplitNetworkTransport`.
-  private(set) lazy var client = ApolloClient(networkTransport: self.splitNetworkTransport)
+  private(set) lazy var client = ApolloClient(networkTransport: self.splitNetworkTransport, store: self.store)
+
+  /// A common store to use for `normalTransport` and `client`.
+  private lazy var store = ApolloStore()
 }
 ```
 

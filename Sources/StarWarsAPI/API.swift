@@ -168,9 +168,11 @@ public final class CreateReviewForEpisodeMutation: GraphQLMutation {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Mutation"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("createReview", arguments: ["episode": GraphQLVariable("episode"), "review": GraphQLVariable("review")], type: .object(CreateReview.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("createReview", arguments: ["episode": GraphQLVariable("episode"), "review": GraphQLVariable("review")], type: .object(CreateReview.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -194,11 +196,13 @@ public final class CreateReviewForEpisodeMutation: GraphQLMutation {
     public struct CreateReview: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Review"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("stars", type: .nonNull(.scalar(Int.self))),
-        GraphQLField("commentary", type: .scalar(String.self)),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("stars", type: .nonNull(.scalar(Int.self))),
+          GraphQLField("commentary", type: .scalar(String.self)),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -265,9 +269,11 @@ public final class CreateAwesomeReviewMutation: GraphQLMutation {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Mutation"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("createReview", arguments: ["episode": "JEDI", "review": ["stars": 10, "commentary": "This is awesome!"]], type: .object(CreateReview.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("createReview", arguments: ["episode": "JEDI", "review": ["stars": 10, "commentary": "This is awesome!"]], type: .object(CreateReview.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -291,11 +297,114 @@ public final class CreateAwesomeReviewMutation: GraphQLMutation {
     public struct CreateReview: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Review"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("stars", type: .nonNull(.scalar(Int.self))),
-        GraphQLField("commentary", type: .scalar(String.self)),
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("stars", type: .nonNull(.scalar(Int.self))),
+          GraphQLField("commentary", type: .scalar(String.self)),
+        ]
+      }
+
+      public private(set) var resultMap: ResultMap
+
+      public init(unsafeResultMap: ResultMap) {
+        self.resultMap = unsafeResultMap
+      }
+
+      public init(stars: Int, commentary: String? = nil) {
+        self.init(unsafeResultMap: ["__typename": "Review", "stars": stars, "commentary": commentary])
+      }
+
+      public var __typename: String {
+        get {
+          return resultMap["__typename"]! as! String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "__typename")
+        }
+      }
+
+      /// The number of stars this review gave, 1-5
+      public var stars: Int {
+        get {
+          return resultMap["stars"]! as! Int
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "stars")
+        }
+      }
+
+      /// Comment about the movie
+      public var commentary: String? {
+        get {
+          return resultMap["commentary"] as? String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "commentary")
+        }
+      }
+    }
+  }
+}
+
+public final class CreateReviewWithNullFieldMutation: GraphQLMutation {
+  /// The raw GraphQL definition of this operation.
+  public let operationDefinition: String =
+    """
+    mutation CreateReviewWithNullField {
+      createReview(episode: JEDI, review: {stars: 10, commentary: null}) {
+        __typename
+        stars
+        commentary
+      }
+    }
+    """
+
+  public let operationName: String = "CreateReviewWithNullField"
+
+  public let operationIdentifier: String? = "a9600d176cd7e4671b8689f1d01fe79ea896932bfafb8a925af673f0e4111828"
+
+  public init() {
+  }
+
+  public struct Data: GraphQLSelectionSet {
+    public static let possibleTypes: [String] = ["Mutation"]
+
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("createReview", arguments: ["episode": "JEDI", "review": ["stars": 10, "commentary": nil]], type: .object(CreateReview.selections)),
       ]
+    }
+
+    public private(set) var resultMap: ResultMap
+
+    public init(unsafeResultMap: ResultMap) {
+      self.resultMap = unsafeResultMap
+    }
+
+    public init(createReview: CreateReview? = nil) {
+      self.init(unsafeResultMap: ["__typename": "Mutation", "createReview": createReview.flatMap { (value: CreateReview) -> ResultMap in value.resultMap }])
+    }
+
+    public var createReview: CreateReview? {
+      get {
+        return (resultMap["createReview"] as? ResultMap).flatMap { CreateReview(unsafeResultMap: $0) }
+      }
+      set {
+        resultMap.updateValue(newValue?.resultMap, forKey: "createReview")
+      }
+    }
+
+    public struct CreateReview: GraphQLSelectionSet {
+      public static let possibleTypes: [String] = ["Review"]
+
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("stars", type: .nonNull(.scalar(Int.self))),
+          GraphQLField("commentary", type: .scalar(String.self)),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -372,9 +481,11 @@ public final class HeroAndFriendsNamesQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -398,11 +509,13 @@ public final class HeroAndFriendsNamesQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        GraphQLField("friends", type: .list(.object(Friend.selections))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          GraphQLField("friends", type: .list(.object(Friend.selections))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -450,10 +563,12 @@ public final class HeroAndFriendsNamesQuery: GraphQLQuery {
       public struct Friend: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Human", "Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -527,9 +642,11 @@ public final class HeroAndFriendsNamesWithIDsQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -553,12 +670,14 @@ public final class HeroAndFriendsNamesWithIDsQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        GraphQLField("friends", type: .list(.object(Friend.selections))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          GraphQLField("friends", type: .list(.object(Friend.selections))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -616,11 +735,13 @@ public final class HeroAndFriendsNamesWithIDsQuery: GraphQLQuery {
       public struct Friend: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Human", "Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -703,9 +824,11 @@ public final class HeroAndFriendsIDsQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -729,12 +852,14 @@ public final class HeroAndFriendsIDsQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        GraphQLField("friends", type: .list(.object(Friend.selections))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          GraphQLField("friends", type: .list(.object(Friend.selections))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -792,10 +917,12 @@ public final class HeroAndFriendsIDsQuery: GraphQLQuery {
       public struct Friend: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Human", "Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -868,9 +995,11 @@ public final class HeroAndFriendsNamesWithIdForParentOnlyQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -894,12 +1023,14 @@ public final class HeroAndFriendsNamesWithIdForParentOnlyQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        GraphQLField("friends", type: .list(.object(Friend.selections))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          GraphQLField("friends", type: .list(.object(Friend.selections))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -957,10 +1088,12 @@ public final class HeroAndFriendsNamesWithIdForParentOnlyQuery: GraphQLQuery {
       public struct Friend: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Human", "Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -1016,7 +1149,11 @@ public final class HeroAndFriendsNamesWithFragmentQuery: GraphQLQuery {
 
   public let operationIdentifier: String? = "1d3ad903dad146ff9d7aa09813fc01becd017489bfc1af8ffd178498730a5a26"
 
-  public var queryDocument: String { return operationDefinition.appending(FriendsNames.fragmentDefinition) }
+  public var queryDocument: String {
+    var document: String = operationDefinition
+    document.append("\n" + FriendsNames.fragmentDefinition)
+    return document
+  }
 
   public var episode: Episode?
 
@@ -1031,9 +1168,11 @@ public final class HeroAndFriendsNamesWithFragmentQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -1057,12 +1196,14 @@ public final class HeroAndFriendsNamesWithFragmentQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("friends", type: .list(.object(Friend.selections))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("friends", type: .list(.object(Friend.selections))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -1136,10 +1277,12 @@ public final class HeroAndFriendsNamesWithFragmentQuery: GraphQLQuery {
       public struct Friend: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Human", "Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -1203,7 +1346,11 @@ public final class HeroAndFriendsNamesWithFragmentTwiceQuery: GraphQLQuery {
 
   public let operationIdentifier: String? = "e02ef22e116ad1ca35f0298ed3badb60eeb986203f0088575a5f137768c322fc"
 
-  public var queryDocument: String { return operationDefinition.appending(CharacterName.fragmentDefinition) }
+  public var queryDocument: String {
+    var document: String = operationDefinition
+    document.append("\n" + CharacterName.fragmentDefinition)
+    return document
+  }
 
   public var episode: Episode?
 
@@ -1218,9 +1365,11 @@ public final class HeroAndFriendsNamesWithFragmentTwiceQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -1244,15 +1393,17 @@ public final class HeroAndFriendsNamesWithFragmentTwiceQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLTypeCase(
-          variants: ["Droid": AsDroid.selections],
-          default: [
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("friends", type: .list(.object(Friend.selections))),
-          ]
-        )
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLTypeCase(
+            variants: ["Droid": AsDroid.selections],
+            default: [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("friends", type: .list(.object(Friend.selections))),
+            ]
+          )
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -1290,11 +1441,13 @@ public final class HeroAndFriendsNamesWithFragmentTwiceQuery: GraphQLQuery {
       public struct Friend: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Human", "Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -1370,11 +1523,13 @@ public final class HeroAndFriendsNamesWithFragmentTwiceQuery: GraphQLQuery {
       public struct AsDroid: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("friends", type: .list(.object(Friend.selections))),
-          GraphQLField("friends", type: .list(.object(Friend.selections))),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("friends", type: .list(.object(Friend.selections))),
+            GraphQLField("friends", type: .list(.object(Friend.selections))),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -1408,12 +1563,14 @@ public final class HeroAndFriendsNamesWithFragmentTwiceQuery: GraphQLQuery {
         public struct Friend: GraphQLSelectionSet {
           public static let possibleTypes: [String] = ["Human", "Droid"]
 
-          public static let selections: [GraphQLSelection] = [
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("name", type: .nonNull(.scalar(String.self))),
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          ]
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("name", type: .nonNull(.scalar(String.self))),
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            ]
+          }
 
           public private(set) var resultMap: ResultMap
 
@@ -1501,9 +1658,11 @@ public final class HeroAppearsInQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -1527,10 +1686,12 @@ public final class HeroAppearsInQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -1584,7 +1745,11 @@ public final class HeroAppearsInWithFragmentQuery: GraphQLQuery {
 
   public let operationIdentifier: String? = "1756158bd7736d58db45a48d74a724fa1b6fdac735376df8afac8318ba5431fb"
 
-  public var queryDocument: String { return operationDefinition.appending(CharacterAppearsIn.fragmentDefinition) }
+  public var queryDocument: String {
+    var document: String = operationDefinition
+    document.append("\n" + CharacterAppearsIn.fragmentDefinition)
+    return document
+  }
 
   public var episode: Episode?
 
@@ -1599,9 +1764,11 @@ public final class HeroAppearsInWithFragmentQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -1625,11 +1792,13 @@ public final class HeroAppearsInWithFragmentQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -1722,9 +1891,11 @@ public final class HeroNameConditionalExclusionQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -1748,12 +1919,14 @@ public final class HeroNameConditionalExclusionQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLBooleanCondition(variableName: "skipName", inverted: true, selections: [
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        ]),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLBooleanCondition(variableName: "skipName", inverted: true, selections: [
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          ]),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -1820,9 +1993,11 @@ public final class HeroNameConditionalInclusionQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -1846,12 +2021,14 @@ public final class HeroNameConditionalInclusionQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLBooleanCondition(variableName: "includeName", inverted: false, selections: [
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        ]),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLBooleanCondition(variableName: "includeName", inverted: false, selections: [
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          ]),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -1920,9 +2097,11 @@ public final class HeroNameConditionalBothQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -1946,14 +2125,16 @@ public final class HeroNameConditionalBothQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLBooleanCondition(variableName: "includeName", inverted: false, selections: [
-          GraphQLBooleanCondition(variableName: "skipName", inverted: true, selections: [
-            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLBooleanCondition(variableName: "includeName", inverted: false, selections: [
+            GraphQLBooleanCondition(variableName: "skipName", inverted: true, selections: [
+              GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            ]),
           ]),
-        ]),
-      ]
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -2023,9 +2204,11 @@ public final class HeroNameConditionalBothSeparateQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -2049,15 +2232,17 @@ public final class HeroNameConditionalBothSeparateQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLBooleanCondition(variableName: "skipName", inverted: true, selections: [
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        ]),
-        GraphQLBooleanCondition(variableName: "includeName", inverted: false, selections: [
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        ]),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLBooleanCondition(variableName: "skipName", inverted: true, selections: [
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          ]),
+          GraphQLBooleanCondition(variableName: "includeName", inverted: false, selections: [
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          ]),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -2127,9 +2312,11 @@ public final class HeroDetailsInlineConditionalInclusionQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -2153,13 +2340,15 @@ public final class HeroDetailsInlineConditionalInclusionQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLBooleanCondition(variableName: "includeDetails", inverted: false, selections: [
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
-        ]),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLBooleanCondition(variableName: "includeDetails", inverted: false, selections: [
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
+          ]),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -2223,7 +2412,11 @@ public final class HeroDetailsFragmentConditionalInclusionQuery: GraphQLQuery {
 
   public let operationIdentifier: String? = "b31aec7d977249e185922e4cc90318fd2c7197631470904bf937b0626de54b4f"
 
-  public var queryDocument: String { return operationDefinition.appending(HeroDetails.fragmentDefinition) }
+  public var queryDocument: String {
+    var document: String = operationDefinition
+    document.append("\n" + HeroDetails.fragmentDefinition)
+    return document
+  }
 
   public var includeDetails: Bool
 
@@ -2238,9 +2431,11 @@ public final class HeroDetailsFragmentConditionalInclusionQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -2264,18 +2459,20 @@ public final class HeroDetailsFragmentConditionalInclusionQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLTypeCase(
-          variants: ["Human": AsHuman.selections, "Droid": AsDroid.selections],
-          default: [
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLBooleanCondition(variableName: "includeDetails", inverted: false, selections: [
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLTypeCase(
+            variants: ["Human": AsHuman.selections, "Droid": AsDroid.selections],
+            default: [
               GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-              GraphQLField("name", type: .nonNull(.scalar(String.self))),
-            ]),
-          ]
-        )
-      ]
+              GraphQLBooleanCondition(variableName: "includeDetails", inverted: false, selections: [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("name", type: .nonNull(.scalar(String.self))),
+              ]),
+            ]
+          )
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -2350,20 +2547,22 @@ public final class HeroDetailsFragmentConditionalInclusionQuery: GraphQLQuery {
       public struct AsHuman: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Human"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLBooleanCondition(variableName: "includeDetails", inverted: false, selections: [
+        public static var selections: [GraphQLSelection] {
+          return [
             GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          ]),
-          GraphQLBooleanCondition(variableName: "includeDetails", inverted: false, selections: [
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("name", type: .nonNull(.scalar(String.self))),
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("name", type: .nonNull(.scalar(String.self))),
-            GraphQLField("height", type: .scalar(Double.self)),
-          ]),
-        ]
+            GraphQLBooleanCondition(variableName: "includeDetails", inverted: false, selections: [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            ]),
+            GraphQLBooleanCondition(variableName: "includeDetails", inverted: false, selections: [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("name", type: .nonNull(.scalar(String.self))),
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("name", type: .nonNull(.scalar(String.self))),
+              GraphQLField("height", type: .scalar(Double.self)),
+            ]),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -2445,20 +2644,22 @@ public final class HeroDetailsFragmentConditionalInclusionQuery: GraphQLQuery {
       public struct AsDroid: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLBooleanCondition(variableName: "includeDetails", inverted: false, selections: [
+        public static var selections: [GraphQLSelection] {
+          return [
             GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          ]),
-          GraphQLBooleanCondition(variableName: "includeDetails", inverted: false, selections: [
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("name", type: .nonNull(.scalar(String.self))),
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("name", type: .nonNull(.scalar(String.self))),
-            GraphQLField("primaryFunction", type: .scalar(String.self)),
-          ]),
-        ]
+            GraphQLBooleanCondition(variableName: "includeDetails", inverted: false, selections: [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            ]),
+            GraphQLBooleanCondition(variableName: "includeDetails", inverted: false, selections: [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("name", type: .nonNull(.scalar(String.self))),
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("name", type: .nonNull(.scalar(String.self))),
+              GraphQLField("primaryFunction", type: .scalar(String.self)),
+            ]),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -2563,9 +2764,11 @@ public final class HeroNameTypeSpecificConditionalInclusionQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -2589,17 +2792,19 @@ public final class HeroNameTypeSpecificConditionalInclusionQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLTypeCase(
-          variants: ["Droid": AsDroid.selections],
-          default: [
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLBooleanCondition(variableName: "includeName", inverted: false, selections: [
-              GraphQLField("name", type: .nonNull(.scalar(String.self))),
-            ]),
-          ]
-        )
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLTypeCase(
+            variants: ["Droid": AsDroid.selections],
+            default: [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLBooleanCondition(variableName: "includeName", inverted: false, selections: [
+                GraphQLField("name", type: .nonNull(.scalar(String.self))),
+              ]),
+            ]
+          )
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -2648,13 +2853,15 @@ public final class HeroNameTypeSpecificConditionalInclusionQuery: GraphQLQuery {
       public struct AsDroid: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLBooleanCondition(variableName: "includeName", inverted: false, selections: [
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLBooleanCondition(variableName: "includeName", inverted: false, selections: [
+              GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            ]),
             GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          ]),
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        ]
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -2724,9 +2931,11 @@ public final class HeroFriendsDetailsConditionalInclusionQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -2750,12 +2959,14 @@ public final class HeroFriendsDetailsConditionalInclusionQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLBooleanCondition(variableName: "includeFriendsDetails", inverted: false, selections: [
-          GraphQLField("friends", type: .list(.object(Friend.selections))),
-        ]),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLBooleanCondition(variableName: "includeFriendsDetails", inverted: false, selections: [
+            GraphQLField("friends", type: .list(.object(Friend.selections))),
+          ]),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -2793,15 +3004,17 @@ public final class HeroFriendsDetailsConditionalInclusionQuery: GraphQLQuery {
       public struct Friend: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Human", "Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLTypeCase(
-            variants: ["Droid": AsDroid.selections],
-            default: [
-              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-              GraphQLField("name", type: .nonNull(.scalar(String.self))),
-            ]
-          )
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLTypeCase(
+              variants: ["Droid": AsDroid.selections],
+              default: [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("name", type: .nonNull(.scalar(String.self))),
+              ]
+            )
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -2850,11 +3063,13 @@ public final class HeroFriendsDetailsConditionalInclusionQuery: GraphQLQuery {
         public struct AsDroid: GraphQLSelectionSet {
           public static let possibleTypes: [String] = ["Droid"]
 
-          public static let selections: [GraphQLSelection] = [
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("name", type: .nonNull(.scalar(String.self))),
-            GraphQLField("primaryFunction", type: .scalar(String.self)),
-          ]
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("name", type: .nonNull(.scalar(String.self))),
+              GraphQLField("primaryFunction", type: .scalar(String.self)),
+            ]
+          }
 
           public private(set) var resultMap: ResultMap
 
@@ -2939,9 +3154,11 @@ public final class HeroFriendsDetailsUnconditionalAndConditionalInclusionQuery: 
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -2965,13 +3182,15 @@ public final class HeroFriendsDetailsUnconditionalAndConditionalInclusionQuery: 
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("friends", type: .list(.object(Friend.selections))),
-        GraphQLBooleanCondition(variableName: "includeFriendsDetails", inverted: false, selections: [
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
           GraphQLField("friends", type: .list(.object(Friend.selections))),
-        ]),
-      ]
+          GraphQLBooleanCondition(variableName: "includeFriendsDetails", inverted: false, selections: [
+            GraphQLField("friends", type: .list(.object(Friend.selections))),
+          ]),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -3009,19 +3228,21 @@ public final class HeroFriendsDetailsUnconditionalAndConditionalInclusionQuery: 
       public struct Friend: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Human", "Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLTypeCase(
-            variants: ["Droid": AsDroid.selections],
-            default: [
-              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-              GraphQLField("name", type: .nonNull(.scalar(String.self))),
-              GraphQLBooleanCondition(variableName: "includeFriendsDetails", inverted: false, selections: [
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLTypeCase(
+              variants: ["Droid": AsDroid.selections],
+              default: [
                 GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
                 GraphQLField("name", type: .nonNull(.scalar(String.self))),
-              ]),
-            ]
-          )
-        ]
+                GraphQLBooleanCondition(variableName: "includeFriendsDetails", inverted: false, selections: [
+                  GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                  GraphQLField("name", type: .nonNull(.scalar(String.self))),
+                ]),
+              ]
+            )
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -3070,19 +3291,21 @@ public final class HeroFriendsDetailsUnconditionalAndConditionalInclusionQuery: 
         public struct AsDroid: GraphQLSelectionSet {
           public static let possibleTypes: [String] = ["Droid"]
 
-          public static let selections: [GraphQLSelection] = [
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("name", type: .nonNull(.scalar(String.self))),
-            GraphQLBooleanCondition(variableName: "includeFriendsDetails", inverted: false, selections: [
+          public static var selections: [GraphQLSelection] {
+            return [
               GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
               GraphQLField("name", type: .nonNull(.scalar(String.self))),
-            ]),
-            GraphQLBooleanCondition(variableName: "includeFriendsDetails", inverted: false, selections: [
-              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-              GraphQLField("name", type: .nonNull(.scalar(String.self))),
-              GraphQLField("primaryFunction", type: .scalar(String.self)),
-            ]),
-          ]
+              GraphQLBooleanCondition(variableName: "includeFriendsDetails", inverted: false, selections: [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("name", type: .nonNull(.scalar(String.self))),
+              ]),
+              GraphQLBooleanCondition(variableName: "includeFriendsDetails", inverted: false, selections: [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("name", type: .nonNull(.scalar(String.self))),
+                GraphQLField("primaryFunction", type: .scalar(String.self)),
+              ]),
+            ]
+          }
 
           public private(set) var resultMap: ResultMap
 
@@ -3163,9 +3386,11 @@ public final class HeroDetailsQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -3189,15 +3414,17 @@ public final class HeroDetailsQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLTypeCase(
-          variants: ["Human": AsHuman.selections, "Droid": AsDroid.selections],
-          default: [
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          ]
-        )
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLTypeCase(
+            variants: ["Human": AsHuman.selections, "Droid": AsDroid.selections],
+            default: [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            ]
+          )
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -3246,11 +3473,13 @@ public final class HeroDetailsQuery: GraphQLQuery {
       public struct AsHuman: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Human"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          GraphQLField("height", type: .scalar(Double.self)),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            GraphQLField("height", type: .scalar(Double.self)),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -3306,11 +3535,13 @@ public final class HeroDetailsQuery: GraphQLQuery {
       public struct AsDroid: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          GraphQLField("primaryFunction", type: .scalar(String.self)),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            GraphQLField("primaryFunction", type: .scalar(String.self)),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -3371,7 +3602,11 @@ public final class HeroDetailsWithFragmentQuery: GraphQLQuery {
 
   public let operationIdentifier: String? = "d20fa2f460058b8eec3d227f2f6088a708cf35dfa2b5ebf1414e34f9674ecfce"
 
-  public var queryDocument: String { return operationDefinition.appending(HeroDetails.fragmentDefinition) }
+  public var queryDocument: String {
+    var document: String = operationDefinition
+    document.append("\n" + HeroDetails.fragmentDefinition)
+    return document
+  }
 
   public var episode: Episode?
 
@@ -3386,9 +3621,11 @@ public final class HeroDetailsWithFragmentQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -3412,16 +3649,18 @@ public final class HeroDetailsWithFragmentQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLTypeCase(
-          variants: ["Human": AsHuman.selections, "Droid": AsDroid.selections],
-          default: [
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          ]
-        )
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLTypeCase(
+            variants: ["Human": AsHuman.selections, "Droid": AsDroid.selections],
+            default: [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            ]
+          )
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -3496,14 +3735,16 @@ public final class HeroDetailsWithFragmentQuery: GraphQLQuery {
       public struct AsHuman: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Human"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          GraphQLField("height", type: .scalar(Double.self)),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            GraphQLField("height", type: .scalar(Double.self)),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -3585,14 +3826,16 @@ public final class HeroDetailsWithFragmentQuery: GraphQLQuery {
       public struct AsDroid: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          GraphQLField("primaryFunction", type: .scalar(String.self)),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            GraphQLField("primaryFunction", type: .scalar(String.self)),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -3679,7 +3922,11 @@ public final class DroidDetailsWithFragmentQuery: GraphQLQuery {
 
   public let operationIdentifier: String? = "7277e97563e911ac8f5c91d401028d218aae41f38df014d7fa0b037bb2a2e739"
 
-  public var queryDocument: String { return operationDefinition.appending(DroidDetails.fragmentDefinition) }
+  public var queryDocument: String {
+    var document: String = operationDefinition
+    document.append("\n" + DroidDetails.fragmentDefinition)
+    return document
+  }
 
   public var episode: Episode?
 
@@ -3694,9 +3941,11 @@ public final class DroidDetailsWithFragmentQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -3720,14 +3969,16 @@ public final class DroidDetailsWithFragmentQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLTypeCase(
-          variants: ["Droid": AsDroid.selections],
-          default: [
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          ]
-        )
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLTypeCase(
+            variants: ["Droid": AsDroid.selections],
+            default: [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            ]
+          )
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -3794,12 +4045,14 @@ public final class DroidDetailsWithFragmentQuery: GraphQLQuery {
       public struct AsDroid: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          GraphQLField("primaryFunction", type: .scalar(String.self)),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            GraphQLField("primaryFunction", type: .scalar(String.self)),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -3906,9 +4159,11 @@ public final class HeroFriendsOfFriendsNamesQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -3932,10 +4187,12 @@ public final class HeroFriendsOfFriendsNamesQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("friends", type: .list(.object(Friend.selections))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("friends", type: .list(.object(Friend.selections))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -3973,11 +4230,13 @@ public final class HeroFriendsOfFriendsNamesQuery: GraphQLQuery {
       public struct Friend: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Human", "Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
-          GraphQLField("friends", type: .list(.object(Friend.selections))),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+            GraphQLField("friends", type: .list(.object(Friend.selections))),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -4025,10 +4284,12 @@ public final class HeroFriendsOfFriendsNamesQuery: GraphQLQuery {
         public struct Friend: GraphQLSelectionSet {
           public static let possibleTypes: [String] = ["Human", "Droid"]
 
-          public static let selections: [GraphQLSelection] = [
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          ]
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            ]
+          }
 
           public private(set) var resultMap: ResultMap
 
@@ -4097,9 +4358,11 @@ public final class HeroNameQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -4123,10 +4386,12 @@ public final class HeroNameQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -4194,9 +4459,11 @@ public final class HeroNameWithIdQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -4220,11 +4487,13 @@ public final class HeroNameWithIdQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -4288,7 +4557,11 @@ public final class HeroNameWithFragmentQuery: GraphQLQuery {
 
   public let operationIdentifier: String? = "b952f0054915a32ec524ac0dde0244bcda246649debe149f9e32e303e21c8266"
 
-  public var queryDocument: String { return operationDefinition.appending(CharacterName.fragmentDefinition) }
+  public var queryDocument: String {
+    var document: String = operationDefinition
+    document.append("\n" + CharacterName.fragmentDefinition)
+    return document
+  }
 
   public var episode: Episode?
 
@@ -4303,9 +4576,11 @@ public final class HeroNameWithFragmentQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -4329,11 +4604,13 @@ public final class HeroNameWithFragmentQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -4414,7 +4691,11 @@ public final class HeroNameWithFragmentAndIdQuery: GraphQLQuery {
 
   public let operationIdentifier: String? = "a87a0694c09d1ed245e9a80f245d96a5f57b20a4aa936ee9ab09b2a43620db02"
 
-  public var queryDocument: String { return operationDefinition.appending(CharacterName.fragmentDefinition) }
+  public var queryDocument: String {
+    var document: String = operationDefinition
+    document.append("\n" + CharacterName.fragmentDefinition)
+    return document
+  }
 
   public var episode: Episode?
 
@@ -4429,9 +4710,11 @@ public final class HeroNameWithFragmentAndIdQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -4455,12 +4738,14 @@ public final class HeroNameWithFragmentAndIdQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -4534,23 +4819,22 @@ public final class HeroNameWithFragmentAndIdQuery: GraphQLQuery {
   }
 }
 
-public final class HeroNameAndAppearsInWithFragmentQuery: GraphQLQuery {
+public final class HeroNameAndAppearsInQuery: GraphQLQuery {
   /// The raw GraphQL definition of this operation.
   public let operationDefinition: String =
     """
-    query HeroNameAndAppearsInWithFragment($episode: Episode) {
+    query HeroNameAndAppearsIn($episode: Episode) {
       hero(episode: $episode) {
         __typename
-        ...CharacterNameAndAppearsIn
+        name
+        appearsIn
       }
     }
     """
 
-  public let operationName: String = "HeroNameAndAppearsInWithFragment"
+  public let operationName: String = "HeroNameAndAppearsIn"
 
-  public let operationIdentifier: String? = "0664fed3eb4f9fbdb44e8691d9e8fd11f2b3c097ba11327592054f602bd3ba1a"
-
-  public var queryDocument: String { return operationDefinition.appending(CharacterNameAndAppearsIn.fragmentDefinition) }
+  public let operationIdentifier: String? = "f714414a2002404f9943490c8cc9c1a7b8ecac3ca229fa5a326186b43c1385ce"
 
   public var episode: Episode?
 
@@ -4565,9 +4849,11 @@ public final class HeroNameAndAppearsInWithFragmentQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -4591,12 +4877,131 @@ public final class HeroNameAndAppearsInWithFragmentQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
+        ]
+      }
+
+      public private(set) var resultMap: ResultMap
+
+      public init(unsafeResultMap: ResultMap) {
+        self.resultMap = unsafeResultMap
+      }
+
+      public static func makeHuman(name: String, appearsIn: [Episode?]) -> Hero {
+        return Hero(unsafeResultMap: ["__typename": "Human", "name": name, "appearsIn": appearsIn])
+      }
+
+      public static func makeDroid(name: String, appearsIn: [Episode?]) -> Hero {
+        return Hero(unsafeResultMap: ["__typename": "Droid", "name": name, "appearsIn": appearsIn])
+      }
+
+      public var __typename: String {
+        get {
+          return resultMap["__typename"]! as! String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "__typename")
+        }
+      }
+
+      /// The name of the character
+      public var name: String {
+        get {
+          return resultMap["name"]! as! String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "name")
+        }
+      }
+
+      /// The movies this character appears in
+      public var appearsIn: [Episode?] {
+        get {
+          return resultMap["appearsIn"]! as! [Episode?]
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "appearsIn")
+        }
+      }
+    }
+  }
+}
+
+public final class HeroNameAndAppearsInWithFragmentQuery: GraphQLQuery {
+  /// The raw GraphQL definition of this operation.
+  public let operationDefinition: String =
+    """
+    query HeroNameAndAppearsInWithFragment($episode: Episode) {
+      hero(episode: $episode) {
+        __typename
+        ...CharacterNameAndAppearsIn
+      }
+    }
+    """
+
+  public let operationName: String = "HeroNameAndAppearsInWithFragment"
+
+  public let operationIdentifier: String? = "0664fed3eb4f9fbdb44e8691d9e8fd11f2b3c097ba11327592054f602bd3ba1a"
+
+  public var queryDocument: String {
+    var document: String = operationDefinition
+    document.append("\n" + CharacterNameAndAppearsIn.fragmentDefinition)
+    return document
+  }
+
+  public var episode: Episode?
+
+  public init(episode: Episode? = nil) {
+    self.episode = episode
+  }
+
+  public var variables: GraphQLMap? {
+    return ["episode": episode]
+  }
+
+  public struct Data: GraphQLSelectionSet {
+    public static let possibleTypes: [String] = ["Query"]
+
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
       ]
+    }
+
+    public private(set) var resultMap: ResultMap
+
+    public init(unsafeResultMap: ResultMap) {
+      self.resultMap = unsafeResultMap
+    }
+
+    public init(hero: Hero? = nil) {
+      self.init(unsafeResultMap: ["__typename": "Query", "hero": hero.flatMap { (value: Hero) -> ResultMap in value.resultMap }])
+    }
+
+    public var hero: Hero? {
+      get {
+        return (resultMap["hero"] as? ResultMap).flatMap { Hero(unsafeResultMap: $0) }
+      }
+      set {
+        resultMap.updateValue(newValue?.resultMap, forKey: "hero")
+      }
+    }
+
+    public struct Hero: GraphQLSelectionSet {
+      public static let possibleTypes: [String] = ["Human", "Droid"]
+
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -4717,9 +5122,11 @@ public final class HeroParentTypeDependentFieldQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -4743,15 +5150,17 @@ public final class HeroParentTypeDependentFieldQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLTypeCase(
-          variants: ["Human": AsHuman.selections, "Droid": AsDroid.selections],
-          default: [
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          ]
-        )
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLTypeCase(
+            variants: ["Human": AsHuman.selections, "Droid": AsDroid.selections],
+            default: [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            ]
+          )
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -4800,11 +5209,13 @@ public final class HeroParentTypeDependentFieldQuery: GraphQLQuery {
       public struct AsHuman: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Human"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          GraphQLField("friends", type: .list(.object(Friend.selections))),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            GraphQLField("friends", type: .list(.object(Friend.selections))),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -4848,15 +5259,17 @@ public final class HeroParentTypeDependentFieldQuery: GraphQLQuery {
         public struct Friend: GraphQLSelectionSet {
           public static let possibleTypes: [String] = ["Human", "Droid"]
 
-          public static let selections: [GraphQLSelection] = [
-            GraphQLTypeCase(
-              variants: ["Human": AsHuman.selections],
-              default: [
-                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-                GraphQLField("name", type: .nonNull(.scalar(String.self))),
-              ]
-            )
-          ]
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLTypeCase(
+                variants: ["Human": AsHuman.selections],
+                default: [
+                  GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                  GraphQLField("name", type: .nonNull(.scalar(String.self))),
+                ]
+              )
+            ]
+          }
 
           public private(set) var resultMap: ResultMap
 
@@ -4905,11 +5318,13 @@ public final class HeroParentTypeDependentFieldQuery: GraphQLQuery {
           public struct AsHuman: GraphQLSelectionSet {
             public static let possibleTypes: [String] = ["Human"]
 
-            public static let selections: [GraphQLSelection] = [
-              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-              GraphQLField("name", type: .nonNull(.scalar(String.self))),
-              GraphQLField("height", arguments: ["unit": "FOOT"], type: .scalar(Double.self)),
-            ]
+            public static var selections: [GraphQLSelection] {
+              return [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("name", type: .nonNull(.scalar(String.self))),
+                GraphQLField("height", arguments: ["unit": "FOOT"], type: .scalar(Double.self)),
+              ]
+            }
 
             public private(set) var resultMap: ResultMap
 
@@ -4967,11 +5382,13 @@ public final class HeroParentTypeDependentFieldQuery: GraphQLQuery {
       public struct AsDroid: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("name", type: .nonNull(.scalar(String.self))),
-          GraphQLField("friends", type: .list(.object(Friend.selections))),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+            GraphQLField("friends", type: .list(.object(Friend.selections))),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -5015,15 +5432,17 @@ public final class HeroParentTypeDependentFieldQuery: GraphQLQuery {
         public struct Friend: GraphQLSelectionSet {
           public static let possibleTypes: [String] = ["Human", "Droid"]
 
-          public static let selections: [GraphQLSelection] = [
-            GraphQLTypeCase(
-              variants: ["Human": AsHuman.selections],
-              default: [
-                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-                GraphQLField("name", type: .nonNull(.scalar(String.self))),
-              ]
-            )
-          ]
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLTypeCase(
+                variants: ["Human": AsHuman.selections],
+                default: [
+                  GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                  GraphQLField("name", type: .nonNull(.scalar(String.self))),
+                ]
+              )
+            ]
+          }
 
           public private(set) var resultMap: ResultMap
 
@@ -5072,11 +5491,13 @@ public final class HeroParentTypeDependentFieldQuery: GraphQLQuery {
           public struct AsHuman: GraphQLSelectionSet {
             public static let possibleTypes: [String] = ["Human"]
 
-            public static let selections: [GraphQLSelection] = [
-              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-              GraphQLField("name", type: .nonNull(.scalar(String.self))),
-              GraphQLField("height", arguments: ["unit": "METER"], type: .scalar(Double.self)),
-            ]
+            public static var selections: [GraphQLSelection] {
+              return [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("name", type: .nonNull(.scalar(String.self))),
+                GraphQLField("height", arguments: ["unit": "METER"], type: .scalar(Double.self)),
+              ]
+            }
 
             public private(set) var resultMap: ResultMap
 
@@ -5157,9 +5578,11 @@ public final class HeroTypeDependentAliasedFieldQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", arguments: ["episode": GraphQLVariable("episode")], type: .object(Hero.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -5183,14 +5606,16 @@ public final class HeroTypeDependentAliasedFieldQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLTypeCase(
-          variants: ["Human": AsHuman.selections, "Droid": AsDroid.selections],
-          default: [
-            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          ]
-        )
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLTypeCase(
+            variants: ["Human": AsHuman.selections, "Droid": AsDroid.selections],
+            default: [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            ]
+          )
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -5229,10 +5654,12 @@ public final class HeroTypeDependentAliasedFieldQuery: GraphQLQuery {
       public struct AsHuman: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Human"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("homePlanet", alias: "property", type: .scalar(String.self)),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("homePlanet", alias: "property", type: .scalar(String.self)),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -5278,10 +5705,12 @@ public final class HeroTypeDependentAliasedFieldQuery: GraphQLQuery {
       public struct AsDroid: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Droid"]
 
-        public static let selections: [GraphQLSelection] = [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("primaryFunction", alias: "property", type: .scalar(String.self)),
-        ]
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("primaryFunction", alias: "property", type: .scalar(String.self)),
+          ]
+        }
 
         public private(set) var resultMap: ResultMap
 
@@ -5342,10 +5771,12 @@ public final class SameHeroTwiceQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", type: .object(Hero.selections)),
-      GraphQLField("hero", alias: "r2", type: .object(R2.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", type: .object(Hero.selections)),
+        GraphQLField("hero", alias: "r2", type: .object(R2.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -5378,10 +5809,12 @@ public final class SameHeroTwiceQuery: GraphQLQuery {
     public struct Hero: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -5420,10 +5853,12 @@ public final class SameHeroTwiceQuery: GraphQLQuery {
     public struct R2: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -5461,6 +5896,301 @@ public final class SameHeroTwiceQuery: GraphQLQuery {
   }
 }
 
+public final class SearchQuery: GraphQLQuery {
+  /// The raw GraphQL definition of this operation.
+  public let operationDefinition: String =
+    """
+    query Search($term: String) {
+      search(text: $term) {
+        __typename
+        ... on Human {
+          id
+          name
+        }
+        ... on Droid {
+          id
+          name
+        }
+        ... on Starship {
+          id
+          name
+        }
+      }
+    }
+    """
+
+  public let operationName: String = "Search"
+
+  public let operationIdentifier: String? = "73536da2eec4d83e6e1003e674cb2299d9da2798f7bd310e57339a6bcd713b77"
+
+  public var term: String?
+
+  public init(term: String? = nil) {
+    self.term = term
+  }
+
+  public var variables: GraphQLMap? {
+    return ["term": term]
+  }
+
+  public struct Data: GraphQLSelectionSet {
+    public static let possibleTypes: [String] = ["Query"]
+
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("search", arguments: ["text": GraphQLVariable("term")], type: .list(.object(Search.selections))),
+      ]
+    }
+
+    public private(set) var resultMap: ResultMap
+
+    public init(unsafeResultMap: ResultMap) {
+      self.resultMap = unsafeResultMap
+    }
+
+    public init(search: [Search?]? = nil) {
+      self.init(unsafeResultMap: ["__typename": "Query", "search": search.flatMap { (value: [Search?]) -> [ResultMap?] in value.map { (value: Search?) -> ResultMap? in value.flatMap { (value: Search) -> ResultMap in value.resultMap } } }])
+    }
+
+    public var search: [Search?]? {
+      get {
+        return (resultMap["search"] as? [ResultMap?]).flatMap { (value: [ResultMap?]) -> [Search?] in value.map { (value: ResultMap?) -> Search? in value.flatMap { (value: ResultMap) -> Search in Search(unsafeResultMap: value) } } }
+      }
+      set {
+        resultMap.updateValue(newValue.flatMap { (value: [Search?]) -> [ResultMap?] in value.map { (value: Search?) -> ResultMap? in value.flatMap { (value: Search) -> ResultMap in value.resultMap } } }, forKey: "search")
+      }
+    }
+
+    public struct Search: GraphQLSelectionSet {
+      public static let possibleTypes: [String] = ["Human", "Droid", "Starship"]
+
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLTypeCase(
+            variants: ["Human": AsHuman.selections, "Droid": AsDroid.selections, "Starship": AsStarship.selections],
+            default: [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            ]
+          )
+        ]
+      }
+
+      public private(set) var resultMap: ResultMap
+
+      public init(unsafeResultMap: ResultMap) {
+        self.resultMap = unsafeResultMap
+      }
+
+      public static func makeHuman(id: GraphQLID, name: String) -> Search {
+        return Search(unsafeResultMap: ["__typename": "Human", "id": id, "name": name])
+      }
+
+      public static func makeDroid(id: GraphQLID, name: String) -> Search {
+        return Search(unsafeResultMap: ["__typename": "Droid", "id": id, "name": name])
+      }
+
+      public static func makeStarship(id: GraphQLID, name: String) -> Search {
+        return Search(unsafeResultMap: ["__typename": "Starship", "id": id, "name": name])
+      }
+
+      public var __typename: String {
+        get {
+          return resultMap["__typename"]! as! String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "__typename")
+        }
+      }
+
+      public var asHuman: AsHuman? {
+        get {
+          if !AsHuman.possibleTypes.contains(__typename) { return nil }
+          return AsHuman(unsafeResultMap: resultMap)
+        }
+        set {
+          guard let newValue = newValue else { return }
+          resultMap = newValue.resultMap
+        }
+      }
+
+      public struct AsHuman: GraphQLSelectionSet {
+        public static let possibleTypes: [String] = ["Human"]
+
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          ]
+        }
+
+        public private(set) var resultMap: ResultMap
+
+        public init(unsafeResultMap: ResultMap) {
+          self.resultMap = unsafeResultMap
+        }
+
+        public init(id: GraphQLID, name: String) {
+          self.init(unsafeResultMap: ["__typename": "Human", "id": id, "name": name])
+        }
+
+        public var __typename: String {
+          get {
+            return resultMap["__typename"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "__typename")
+          }
+        }
+
+        /// The ID of the human
+        public var id: GraphQLID {
+          get {
+            return resultMap["id"]! as! GraphQLID
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "id")
+          }
+        }
+
+        /// What this human calls themselves
+        public var name: String {
+          get {
+            return resultMap["name"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "name")
+          }
+        }
+      }
+
+      public var asDroid: AsDroid? {
+        get {
+          if !AsDroid.possibleTypes.contains(__typename) { return nil }
+          return AsDroid(unsafeResultMap: resultMap)
+        }
+        set {
+          guard let newValue = newValue else { return }
+          resultMap = newValue.resultMap
+        }
+      }
+
+      public struct AsDroid: GraphQLSelectionSet {
+        public static let possibleTypes: [String] = ["Droid"]
+
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          ]
+        }
+
+        public private(set) var resultMap: ResultMap
+
+        public init(unsafeResultMap: ResultMap) {
+          self.resultMap = unsafeResultMap
+        }
+
+        public init(id: GraphQLID, name: String) {
+          self.init(unsafeResultMap: ["__typename": "Droid", "id": id, "name": name])
+        }
+
+        public var __typename: String {
+          get {
+            return resultMap["__typename"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "__typename")
+          }
+        }
+
+        /// The ID of the droid
+        public var id: GraphQLID {
+          get {
+            return resultMap["id"]! as! GraphQLID
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "id")
+          }
+        }
+
+        /// What others call this droid
+        public var name: String {
+          get {
+            return resultMap["name"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "name")
+          }
+        }
+      }
+
+      public var asStarship: AsStarship? {
+        get {
+          if !AsStarship.possibleTypes.contains(__typename) { return nil }
+          return AsStarship(unsafeResultMap: resultMap)
+        }
+        set {
+          guard let newValue = newValue else { return }
+          resultMap = newValue.resultMap
+        }
+      }
+
+      public struct AsStarship: GraphQLSelectionSet {
+        public static let possibleTypes: [String] = ["Starship"]
+
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+            GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          ]
+        }
+
+        public private(set) var resultMap: ResultMap
+
+        public init(unsafeResultMap: ResultMap) {
+          self.resultMap = unsafeResultMap
+        }
+
+        public init(id: GraphQLID, name: String) {
+          self.init(unsafeResultMap: ["__typename": "Starship", "id": id, "name": name])
+        }
+
+        public var __typename: String {
+          get {
+            return resultMap["__typename"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "__typename")
+          }
+        }
+
+        /// The ID of the starship
+        public var id: GraphQLID {
+          get {
+            return resultMap["id"]! as! GraphQLID
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "id")
+          }
+        }
+
+        /// The name of the starship
+        public var name: String {
+          get {
+            return resultMap["name"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "name")
+          }
+        }
+      }
+    }
+  }
+}
+
 public final class StarshipQuery: GraphQLQuery {
   /// The raw GraphQL definition of this operation.
   public let operationDefinition: String =
@@ -5484,9 +6214,11 @@ public final class StarshipQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("starship", arguments: ["id": 3000], type: .object(Starship.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("starship", arguments: ["id": 3000], type: .object(Starship.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -5510,11 +6242,13 @@ public final class StarshipQuery: GraphQLQuery {
     public struct Starship: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Starship"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        GraphQLField("coordinates", type: .list(.nonNull(.list(.nonNull(.scalar(Double.self)))))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          GraphQLField("coordinates", type: .list(.nonNull(.list(.nonNull(.scalar(Double.self)))))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -5588,9 +6322,11 @@ public final class StarshipCoordinatesQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("starshipCoordinates", arguments: ["coordinates": GraphQLVariable("coordinates")], type: .object(StarshipCoordinate.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("starshipCoordinates", arguments: ["coordinates": GraphQLVariable("coordinates")], type: .object(StarshipCoordinate.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -5614,12 +6350,14 @@ public final class StarshipCoordinatesQuery: GraphQLQuery {
     public struct StarshipCoordinate: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Starship"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        GraphQLField("coordinates", type: .list(.nonNull(.list(.nonNull(.scalar(Double.self)))))),
-        GraphQLField("length", type: .scalar(Double.self)),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          GraphQLField("coordinates", type: .list(.nonNull(.list(.nonNull(.scalar(Double.self)))))),
+          GraphQLField("length", type: .scalar(Double.self)),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -5703,9 +6441,11 @@ public final class ReviewAddedSubscription: GraphQLSubscription {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Subscription"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("reviewAdded", arguments: ["episode": GraphQLVariable("episode")], type: .object(ReviewAdded.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("reviewAdded", arguments: ["episode": GraphQLVariable("episode")], type: .object(ReviewAdded.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -5729,12 +6469,14 @@ public final class ReviewAddedSubscription: GraphQLSubscription {
     public struct ReviewAdded: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Review"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("episode", type: .scalar(Episode.self)),
-        GraphQLField("stars", type: .nonNull(.scalar(Int.self))),
-        GraphQLField("commentary", type: .scalar(String.self)),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("episode", type: .scalar(Episode.self)),
+          GraphQLField("stars", type: .nonNull(.scalar(Int.self))),
+          GraphQLField("commentary", type: .scalar(String.self)),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -5818,9 +6560,11 @@ public final class HumanQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("human", arguments: ["id": GraphQLVariable("id")], type: .object(Human.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("human", arguments: ["id": GraphQLVariable("id")], type: .object(Human.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -5844,11 +6588,13 @@ public final class HumanQuery: GraphQLQuery {
     public struct Human: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-        GraphQLField("mass", type: .scalar(Double.self)),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+          GraphQLField("mass", type: .scalar(Double.self)),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -5918,10 +6664,12 @@ public final class TwoHeroesQuery: GraphQLQuery {
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Query"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("hero", alias: "r2", type: .object(R2.selections)),
-      GraphQLField("hero", alias: "luke", arguments: ["episode": "EMPIRE"], type: .object(Luke.selections)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("hero", alias: "r2", type: .object(R2.selections)),
+        GraphQLField("hero", alias: "luke", arguments: ["episode": "EMPIRE"], type: .object(Luke.selections)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -5954,10 +6702,12 @@ public final class TwoHeroesQuery: GraphQLQuery {
     public struct R2: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -5996,10 +6746,12 @@ public final class TwoHeroesQuery: GraphQLQuery {
     public struct Luke: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -6050,13 +6802,15 @@ public struct DroidNameAndPrimaryFunction: GraphQLFragment {
 
   public static let possibleTypes: [String] = ["Droid"]
 
-  public static let selections: [GraphQLSelection] = [
-    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-    GraphQLField("name", type: .nonNull(.scalar(String.self))),
-    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-    GraphQLField("primaryFunction", type: .scalar(String.self)),
-  ]
+  public static var selections: [GraphQLSelection] {
+    return [
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("name", type: .nonNull(.scalar(String.self))),
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("primaryFunction", type: .scalar(String.self)),
+    ]
+  }
 
   public private(set) var resultMap: ResultMap
 
@@ -6146,16 +6900,18 @@ public struct CharacterNameAndDroidPrimaryFunction: GraphQLFragment {
 
   public static let possibleTypes: [String] = ["Human", "Droid"]
 
-  public static let selections: [GraphQLSelection] = [
-    GraphQLTypeCase(
-      variants: ["Droid": AsDroid.selections],
-      default: [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-      ]
-    )
-  ]
+  public static var selections: [GraphQLSelection] {
+    return [
+      GraphQLTypeCase(
+        variants: ["Droid": AsDroid.selections],
+        default: [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+        ]
+      )
+    ]
+  }
 
   public private(set) var resultMap: ResultMap
 
@@ -6241,13 +6997,15 @@ public struct CharacterNameAndDroidPrimaryFunction: GraphQLFragment {
   public struct AsDroid: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Droid"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-      GraphQLField("name", type: .nonNull(.scalar(String.self))),
-      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-      GraphQLField("primaryFunction", type: .scalar(String.self)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        GraphQLField("name", type: .nonNull(.scalar(String.self))),
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        GraphQLField("primaryFunction", type: .scalar(String.self)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -6340,15 +7098,17 @@ public struct CharacterNameAndDroidAppearsIn: GraphQLFragment {
 
   public static let possibleTypes: [String] = ["Human", "Droid"]
 
-  public static let selections: [GraphQLSelection] = [
-    GraphQLTypeCase(
-      variants: ["Droid": AsDroid.selections],
-      default: [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-      ]
-    )
-  ]
+  public static var selections: [GraphQLSelection] {
+    return [
+      GraphQLTypeCase(
+        variants: ["Droid": AsDroid.selections],
+        default: [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+        ]
+      )
+    ]
+  }
 
   public private(set) var resultMap: ResultMap
 
@@ -6397,11 +7157,13 @@ public struct CharacterNameAndDroidAppearsIn: GraphQLFragment {
   public struct AsDroid: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Droid"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-      GraphQLField("name", type: .nonNull(.scalar(String.self))),
-      GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        GraphQLField("name", type: .nonNull(.scalar(String.self))),
+        GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -6456,10 +7218,12 @@ public struct DroidName: GraphQLFragment {
 
   public static let possibleTypes: [String] = ["Droid"]
 
-  public static let selections: [GraphQLSelection] = [
-    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-    GraphQLField("name", type: .nonNull(.scalar(String.self))),
-  ]
+  public static var selections: [GraphQLSelection] {
+    return [
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("name", type: .nonNull(.scalar(String.self))),
+    ]
+  }
 
   public private(set) var resultMap: ResultMap
 
@@ -6503,10 +7267,12 @@ public struct DroidPrimaryFunction: GraphQLFragment {
 
   public static let possibleTypes: [String] = ["Droid"]
 
-  public static let selections: [GraphQLSelection] = [
-    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-    GraphQLField("primaryFunction", type: .scalar(String.self)),
-  ]
+  public static var selections: [GraphQLSelection] {
+    return [
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("primaryFunction", type: .scalar(String.self)),
+    ]
+  }
 
   public private(set) var resultMap: ResultMap
 
@@ -6550,10 +7316,12 @@ public struct HumanHeightWithVariable: GraphQLFragment {
 
   public static let possibleTypes: [String] = ["Human"]
 
-  public static let selections: [GraphQLSelection] = [
-    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-    GraphQLField("height", arguments: ["unit": GraphQLVariable("heightUnit")], type: .scalar(Double.self)),
-  ]
+  public static var selections: [GraphQLSelection] {
+    return [
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("height", arguments: ["unit": GraphQLVariable("heightUnit")], type: .scalar(Double.self)),
+    ]
+  }
 
   public private(set) var resultMap: ResultMap
 
@@ -6597,13 +7365,15 @@ public struct CharacterNameAndAppearsInWithNestedFragments: GraphQLFragment {
 
   public static let possibleTypes: [String] = ["Human", "Droid"]
 
-  public static let selections: [GraphQLSelection] = [
-    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-    GraphQLField("name", type: .nonNull(.scalar(String.self))),
-    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-    GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
-  ]
+  public static var selections: [GraphQLSelection] {
+    return [
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("name", type: .nonNull(.scalar(String.self))),
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
+    ]
+  }
 
   public private(set) var resultMap: ResultMap
 
@@ -6697,12 +7467,14 @@ public struct CharacterNameWithNestedAppearsInFragment: GraphQLFragment {
 
   public static let possibleTypes: [String] = ["Human", "Droid"]
 
-  public static let selections: [GraphQLSelection] = [
-    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-    GraphQLField("name", type: .nonNull(.scalar(String.self))),
-    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-    GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
-  ]
+  public static var selections: [GraphQLSelection] {
+    return [
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("name", type: .nonNull(.scalar(String.self))),
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
+    ]
+  }
 
   public private(set) var resultMap: ResultMap
 
@@ -6795,14 +7567,16 @@ public struct CharacterNameWithInlineFragment: GraphQLFragment {
 
   public static let possibleTypes: [String] = ["Human", "Droid"]
 
-  public static let selections: [GraphQLSelection] = [
-    GraphQLTypeCase(
-      variants: ["Human": AsHuman.selections, "Droid": AsDroid.selections],
-      default: [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-      ]
-    )
-  ]
+  public static var selections: [GraphQLSelection] {
+    return [
+      GraphQLTypeCase(
+        variants: ["Human": AsHuman.selections, "Droid": AsDroid.selections],
+        default: [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        ]
+      )
+    ]
+  }
 
   public private(set) var resultMap: ResultMap
 
@@ -6841,10 +7615,12 @@ public struct CharacterNameWithInlineFragment: GraphQLFragment {
   public struct AsHuman: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Human"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-      GraphQLField("friends", type: .list(.object(Friend.selections))),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        GraphQLField("friends", type: .list(.object(Friend.selections))),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -6878,10 +7654,12 @@ public struct CharacterNameWithInlineFragment: GraphQLFragment {
     public struct Friend: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -6932,13 +7710,15 @@ public struct CharacterNameWithInlineFragment: GraphQLFragment {
   public struct AsDroid: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Droid"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-      GraphQLField("name", type: .nonNull(.scalar(String.self))),
-      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-      GraphQLField("friends", type: .list(.object(Friend.selections))),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        GraphQLField("name", type: .nonNull(.scalar(String.self))),
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        GraphQLField("friends", type: .list(.object(Friend.selections))),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -7017,10 +7797,12 @@ public struct CharacterNameWithInlineFragment: GraphQLFragment {
     public struct Friend: GraphQLSelectionSet {
       public static let possibleTypes: [String] = ["Human", "Droid"]
 
-      public static let selections: [GraphQLSelection] = [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-      ]
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+        ]
+      }
 
       public private(set) var resultMap: ResultMap
 
@@ -7073,10 +7855,12 @@ public struct FriendsNames: GraphQLFragment {
 
   public static let possibleTypes: [String] = ["Human", "Droid"]
 
-  public static let selections: [GraphQLSelection] = [
-    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-    GraphQLField("friends", type: .list(.object(Friend.selections))),
-  ]
+  public static var selections: [GraphQLSelection] {
+    return [
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("friends", type: .list(.object(Friend.selections))),
+    ]
+  }
 
   public private(set) var resultMap: ResultMap
 
@@ -7114,10 +7898,12 @@ public struct FriendsNames: GraphQLFragment {
   public struct Friend: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Human", "Droid"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-      GraphQLField("name", type: .nonNull(.scalar(String.self))),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        GraphQLField("name", type: .nonNull(.scalar(String.self))),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -7166,10 +7952,12 @@ public struct CharacterAppearsIn: GraphQLFragment {
 
   public static let possibleTypes: [String] = ["Human", "Droid"]
 
-  public static let selections: [GraphQLSelection] = [
-    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-    GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
-  ]
+  public static var selections: [GraphQLSelection] {
+    return [
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
+    ]
+  }
 
   public private(set) var resultMap: ResultMap
 
@@ -7223,15 +8011,17 @@ public struct HeroDetails: GraphQLFragment {
 
   public static let possibleTypes: [String] = ["Human", "Droid"]
 
-  public static let selections: [GraphQLSelection] = [
-    GraphQLTypeCase(
-      variants: ["Human": AsHuman.selections, "Droid": AsDroid.selections],
-      default: [
-        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-        GraphQLField("name", type: .nonNull(.scalar(String.self))),
-      ]
-    )
-  ]
+  public static var selections: [GraphQLSelection] {
+    return [
+      GraphQLTypeCase(
+        variants: ["Human": AsHuman.selections, "Droid": AsDroid.selections],
+        default: [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("name", type: .nonNull(.scalar(String.self))),
+        ]
+      )
+    ]
+  }
 
   public private(set) var resultMap: ResultMap
 
@@ -7280,11 +8070,13 @@ public struct HeroDetails: GraphQLFragment {
   public struct AsHuman: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Human"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-      GraphQLField("name", type: .nonNull(.scalar(String.self))),
-      GraphQLField("height", type: .scalar(Double.self)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        GraphQLField("name", type: .nonNull(.scalar(String.self))),
+        GraphQLField("height", type: .scalar(Double.self)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -7340,11 +8132,13 @@ public struct HeroDetails: GraphQLFragment {
   public struct AsDroid: GraphQLSelectionSet {
     public static let possibleTypes: [String] = ["Droid"]
 
-    public static let selections: [GraphQLSelection] = [
-      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-      GraphQLField("name", type: .nonNull(.scalar(String.self))),
-      GraphQLField("primaryFunction", type: .scalar(String.self)),
-    ]
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        GraphQLField("name", type: .nonNull(.scalar(String.self))),
+        GraphQLField("primaryFunction", type: .scalar(String.self)),
+      ]
+    }
 
     public private(set) var resultMap: ResultMap
 
@@ -7400,11 +8194,13 @@ public struct DroidDetails: GraphQLFragment {
 
   public static let possibleTypes: [String] = ["Droid"]
 
-  public static let selections: [GraphQLSelection] = [
-    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-    GraphQLField("name", type: .nonNull(.scalar(String.self))),
-    GraphQLField("primaryFunction", type: .scalar(String.self)),
-  ]
+  public static var selections: [GraphQLSelection] {
+    return [
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("name", type: .nonNull(.scalar(String.self))),
+      GraphQLField("primaryFunction", type: .scalar(String.self)),
+    ]
+  }
 
   public private(set) var resultMap: ResultMap
 
@@ -7458,10 +8254,12 @@ public struct CharacterName: GraphQLFragment {
 
   public static let possibleTypes: [String] = ["Human", "Droid"]
 
-  public static let selections: [GraphQLSelection] = [
-    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-    GraphQLField("name", type: .nonNull(.scalar(String.self))),
-  ]
+  public static var selections: [GraphQLSelection] {
+    return [
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("name", type: .nonNull(.scalar(String.self))),
+    ]
+  }
 
   public private(set) var resultMap: ResultMap
 
@@ -7510,11 +8308,13 @@ public struct CharacterNameAndAppearsIn: GraphQLFragment {
 
   public static let possibleTypes: [String] = ["Human", "Droid"]
 
-  public static let selections: [GraphQLSelection] = [
-    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-    GraphQLField("name", type: .nonNull(.scalar(String.self))),
-    GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
-  ]
+  public static var selections: [GraphQLSelection] {
+    return [
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("name", type: .nonNull(.scalar(String.self))),
+      GraphQLField("appearsIn", type: .nonNull(.list(.scalar(Episode.self)))),
+    ]
+  }
 
   public private(set) var resultMap: ResultMap
 
