@@ -79,12 +79,6 @@ public class WebSocketTransport {
       self.addApolloClientHeaders(to: &self.websocket.request)
     }
   }
-
-  public var security: SSLTrustValidator? {
-    didSet {
-      websocket.security = security
-    }
-  }
   
   /// Designated initializer
   ///
@@ -237,9 +231,8 @@ public class WebSocketTransport {
     print("WebSocketTransport::unprocessed event \(data)")
   }
 
-  public func initServer(reconnect: Bool = true) {
+  public func initServer() {
     processingQueue.async {
-      self.reconnect.value = reconnect
       self.acked = false
 
       if let str = OperationMessage(payload: self.connectingPayload, type: .connectionInit).rawMessage {
