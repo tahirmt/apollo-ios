@@ -36,7 +36,8 @@ public class WebSocketTransport {
 
   let serializationFormat = JSONSerializationFormat.self
   private let requestBodyCreator: RequestBodyCreator
-  
+  private let operationMessageIdCreator: OperationMessageIdCreator
+
   /// non-private for testing - you should not use this directly
   enum SocketConnectionState {
     case disconnected
@@ -59,12 +60,11 @@ public class WebSocketTransport {
   private var subscribers = [String: (Result<JSONObject, Error>) -> Void]()
 
   private var subscriptions : [String: String] = [:]
-  private let processingQueue = DispatchQueue(label: "com.apollographql.WebSocketTransport")
+  let processingQueue = DispatchQueue(label: "com.apollographql.WebSocketTransport")
 
   private let sendOperationIdentifiers: Bool
   private let reconnectionInterval: TimeInterval
   private let allowSendingDuplicates: Bool
-  fileprivate let sequenceNumberCounter = Atomic<Int>(0)
   fileprivate var reconnected = false
 
   /// - NOTE: Setting this won't override immediately if the socket is still connected, only on reconnection.
@@ -80,7 +80,7 @@ public class WebSocketTransport {
       self.addApolloClientHeaders(to: &self.websocket.request)
     }
   }
-
+  
   /// Designated initializer
   ///
   /// - Parameters:
@@ -92,9 +92,10 @@ public class WebSocketTransport {
   ///   - reconnect: Whether to auto reconnect when websocket looses connection. Defaults to true.
   ///   - reconnectionInterval: How long to wait before attempting to reconnect. Defaults to half a second.
   ///   - allowSendingDuplicates: Allow sending duplicate messages. Important when reconnected. Defaults to true.
-  ///  - connectOnInit: Whether the websocket connects immediately on creation. If false, remember to call `resumeWebSocketConnection()` to connect. Defaults to true.
+  ///   - connectOnInit: Whether the websocket connects immediately on creation. If false, remember to call `resumeWebSocketConnection()` to connect. Defaults to true.
   ///   - connectingPayload: [optional] The payload to send on connection. Defaults to an empty `GraphQLMap`.
   ///   - requestBodyCreator: The `RequestBodyCreator` to use when serializing requests. Defaults to an `ApolloRequestBodyCreator`.
+  ///   - operationMessageIdCreator: The `OperationMessageIdCreator` used to generate a unique message identifier per request. Defaults to `ApolloSequencedOperationMessageIdCreator`.
   public init(websocket: WebSocketClient,
               store: ApolloStore? = nil,
               clientName: String = WebSocketTransport.defaultClientName,
@@ -105,7 +106,8 @@ public class WebSocketTransport {
               allowSendingDuplicates: Bool = true,
               connectOnInit: Bool = true,
               connectingPayload: GraphQLMap? = [:],
-              requestBodyCreator: RequestBodyCreator = ApolloRequestBodyCreator()) {
+              requestBodyCreator: RequestBodyCreator = ApolloRequestBodyCreator(),
+              operationMessageIdCreator: OperationMessageIdCreator = ApolloSequencedOperationMessageIdCreator()) {
     self.websocket = websocket
     self.store = store
     self.connectingPayload = connectingPayload
@@ -114,6 +116,7 @@ public class WebSocketTransport {
     self.reconnectionInterval = reconnectionInterval
     self.allowSendingDuplicates = allowSendingDuplicates
     self.requestBodyCreator = requestBodyCreator
+    self.operationMessageIdCreator = operationMessageIdCreator
     self.clientName = clientName
     self.clientVersion = clientVersion
     self.connectOnInit = connectOnInit
@@ -134,6 +137,14 @@ public class WebSocketTransport {
     return websocket.write(ping: data, completion: completionHandler)
   }
 
+  public func connect() {
+    websocket.connect()
+  }
+
+  public func disconnect() {
+    websocket.disconnect()
+  }
+
   private func processMessage(text: String) {
     OperationMessage(serialized: text).parse { parseHandler in
       guard
@@ -148,9 +159,7 @@ public class WebSocketTransport {
       switch messageType {
       case .data,
            .error:
-        if
-          let id = parseHandler.id,
-          let responseHandler = subscribers[id] {
+        if let id = parseHandler.id, let responseHandler = subscribers[id] {
           if let payload = parseHandler.payload {
             responseHandler(.success(payload))
           } else if let error = parseHandler.error {
@@ -183,7 +192,8 @@ public class WebSocketTransport {
         acked = true
         writeQueue()
 
-      case .connectionKeepAlive:
+      case .connectionKeepAlive,
+           .startAck:
         writeQueue()
 
       case .connectionInit,
@@ -274,22 +284,21 @@ public class WebSocketTransport {
                                               sendOperationIdentifiers: self.sendOperationIdentifiers,
                                               sendQueryDocument: true,
                                               autoPersistQuery: false)
-    let sequenceNumber = "\(sequenceNumberCounter.increment())"
-
-    guard let message = OperationMessage(payload: body, id: sequenceNumber).rawMessage else {
+    let identifier = operationMessageIdCreator.requestId()
+    guard let message = OperationMessage(payload: body, id: identifier).rawMessage else {
       return nil
     }
 
     processingQueue.async {
       self.write(message)
 
-      self.subscribers[sequenceNumber] = resultHandler
+      self.subscribers[identifier] = resultHandler
       if operation.operationType == .subscription {
-        self.subscriptions[sequenceNumber] = message
+        self.subscriptions[identifier] = message
       }
     }
 
-    return sequenceNumber
+    return identifier
   }
 
   public func unsubscribe(_ subscriptionId: String) {
