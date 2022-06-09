@@ -3,37 +3,39 @@ version: 2.1
 parameters:
   xcode_version:
     type: string
-    default: "13.0.0"
+    default: "13.2.1"
   ios_current_version:
     type: string
-    default: "15.0"
+    default: "15.2"
   ios_previous_version:
     type: string
     default: "14.5"
   ios_sdk:
     type: string
-    default: "iphonesimulator15.0"
+    default: "iphonesimulator15.2"
   macos_version: # The user-facing version string for macOS builds
     type: string
-    default: "11.5.2"
+    default: "11.6.2"
   macos_sdk: # The full SDK string to use for macOS builds
     type: string
-    default: "macosx11.3"
+    default: "macosx12.1"
   tvos_version: # The user-facing version string of tvOS builds
     type: string
-    default: "15.0"
+    default: "15.2"
   tvos_sdk:
     type: string
-    default: "appletvsimulator15.0"
+    default: "appletvsimulator15.2"
 
 commands:
   integration_test_setup:
     steps:
       - restore_cache:
           key: starwars-server
+      - restore_cache:
+          key: apollo-server-graphql-transport-ws
       - common_test_setup
       - run:
-          command: ./scripts/install-node.sh
+          command: ./scripts/install-node-v12.sh
           name: Install Node
       - run:
           command: ./scripts/install-or-update-starwars-server.sh
@@ -43,18 +45,29 @@ commands:
           name: Start StarWars Server
           background: true
       - run:
-          command: cd SimpleUploadServer && npm install && npm start
+          command: cd SimpleUploadServer && nvm use && npm install && npm start
           name: Start Upload Server
           background: true
       - run:
           command: sudo chmod -R +rwx SimpleUploadServer
           name: Adjust permissions for simple upload server folder
+      - run:
+          command: ./scripts/install-apollo-server-docs-example-server.sh
+          name: Install Apollo Server (graphql-transport-ws configuration)
+      - run:
+          command: cd ../docs-examples/apollo-server/v3/subscriptions-graphql-ws && npm start
+          name: Start Apollo Server (graphql-transport-ws configuration)
+          background: true
   integration_test_cleanup:
     steps:
       - save_cache:
           key: starwars-server
           paths:
             - ../starwars-server
+      - save_cache:
+          key: apollo-server-graphql-transport-ws
+          paths:
+            - ../docs-examples/apollo-server/v3/subscriptions-graphql-ws
   common_test_setup:
     description: Commands to run for setup of every set of tests
     steps:
