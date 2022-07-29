@@ -70,7 +70,6 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
   ///
   /// NOTE: This must be called from the `deinit` of anything holding onto this client in order to break a retain cycle with the delegate.
   public func invalidate() {
-    print("Alex - invalidate")
     self.hasBeenInvalidated.mutate { $0 = true }
     func cleanup() {
       self.session = nil
@@ -91,7 +90,6 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
   ///
   /// - Parameter identifier: The identifier of the task to clear.
   open func clear(task identifier: Int) {
-    print("Alex - clear")
     self.tasks.mutate { _ = $0.removeValue(forKey: identifier) }
   }
   
@@ -124,8 +122,6 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
       return URLSessionTask()
     }
 
-    print("Alex - sendRequest")
-
     let task = self.session.dataTask(with: request)
     let taskData = TaskData(rawCompletion: rawTaskCompletionHandler,
                             completionBlock: completion)
@@ -143,7 +139,6 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
   ///
   /// - Parameter task: The task you wish to cancel.
   open func cancel(task: URLSessionTask) {
-    print("Alex - cancel")
     self.clear(task: task.taskIdentifier)
     task.cancel()
   }
@@ -202,8 +197,6 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
       // No completion blocks, the task has likely been cancelled. Bail out.
       return
     }
-
-    print("Alex - urlSession(task:didCompleteWithError:)")
 
     let data = taskData.data
     let response = taskData.response
@@ -267,8 +260,9 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
     
     self.tasks.mutate {
       guard let taskData = $0[dataTask.taskIdentifier] else {
-        print("Alex - urlSession(dataTask:didReceive:) dataTask not found assertion")
-        assertionFailure("No data found for task \(dataTask.taskIdentifier), cannot append received data")
+        if NSClassFromString("XCTest") == nil {
+          assertionFailure("No data found for task \(dataTask.taskIdentifier), cannot append received data")
+        }
         return
       }
       
