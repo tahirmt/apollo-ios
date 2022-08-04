@@ -261,6 +261,7 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
     self.tasks.mutate {
       guard let taskData = $0[dataTask.taskIdentifier] else {
         if NSClassFromString("XCTest") == nil {
+          print("Alex - XCTest == nil")
           assertionFailure("No data found for task \(dataTask.taskIdentifier), cannot append received data")
         }
         return
