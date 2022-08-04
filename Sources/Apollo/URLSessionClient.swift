@@ -258,11 +258,11 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
       return
     }
 
-    if NSClassFromString("XCTest") != nil {
-        print("Alex - This is an XCTest")
-    }
     self.tasks.mutate {
       guard let taskData = $0[dataTask.taskIdentifier] else {
+        /// Some tests were crashing on CI due to this assertion and found that this is a useful workaround.
+        /// Related post looking for help on the matter from Apollo's forum:
+        /// https://community.apollographql.com/t/ios-unit-testing-with-urlsessionclient/3939
         if NSClassFromString("XCTest") == nil {
           assertionFailure("No data found for task \(dataTask.taskIdentifier), cannot append received data")
         }
