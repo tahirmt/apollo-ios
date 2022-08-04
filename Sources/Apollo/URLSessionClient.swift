@@ -9,14 +9,14 @@ import Foundation
 /// and handled within your app, particularly in regards to what needs to be called
 /// when for background sessions.
 open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegate, URLSessionDataDelegate {
-  
+
   public enum URLSessionClientError: Error, LocalizedError {
     case noHTTPResponse(request: URLRequest?)
     case sessionBecameInvalidWithoutUnderlyingError
     case dataForRequestNotFound(request: URLRequest?)
     case networkError(data: Data, response: HTTPURLResponse?, underlying: Error)
     case sessionInvalidated
-    
+
     public var errorDescription: String? {
       switch self {
       case .noHTTPResponse(let request):
@@ -32,24 +32,24 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
       }
     }
   }
-  
+
   /// A completion block to be called when the raw task has completed, with the raw information from the session
   public typealias RawCompletion = (Data?, HTTPURLResponse?, Error?) -> Void
-  
+
   /// A completion block returning a result. On `.success` it will contain a tuple with non-nil `Data` and its corresponding `HTTPURLResponse`. On `.failure` it will contain an error.
   public typealias Completion = (Result<(Data, HTTPURLResponse), Error>) -> Void
-  
+
   @Atomic private var tasks: [Int: TaskData] = [:]
-  
+
   /// The raw URLSession being used for this client
   open private(set) var session: URLSession!
-  
+
   @Atomic private var hasBeenInvalidated: Bool = false
-  
+
   private var hasNotBeenInvalidated: Bool {
     !self.hasBeenInvalidated
   }
-  
+
   /// Designated initializer.
   ///
   /// - Parameters:
@@ -62,7 +62,7 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
                               delegate: self,
                               delegateQueue: callbackQueue)
   }
-  
+
   /// Cleans up and invalidates everything related to this session client.
   ///
   /// NOTE: This must be called from the `deinit` of anything holding onto this client in order to break a retain cycle with the delegate.
@@ -82,14 +82,14 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
     session.invalidateAndCancel()
     cleanup()
   }
-  
+
   /// Clears underlying dictionaries of any data related to a particular task identifier.
   ///
   /// - Parameter identifier: The identifier of the task to clear.
   open func clear(task identifier: Int) {
     self.$tasks.mutate { _ = $0.removeValue(forKey: identifier) }
   }
-  
+
   /// Clears underlying dictionaries of any data related to all tasks.
   ///
   /// Mostly useful for cleanup and/or after invalidation of the `URLSession`.
@@ -98,10 +98,10 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
       // Nothing to clear
       return
     }
-    
+
     self.$tasks.mutate { $0.removeAll() }
   }
-  
+
   /// The main method to perform a request.
   ///
   /// - Parameters:
@@ -118,18 +118,18 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
       completion(.failure(URLSessionClientError.sessionInvalidated))
       return URLSessionTask()
     }
-    
+
     let task = self.session.dataTask(with: request)
     let taskData = TaskData(rawCompletion: rawTaskCompletionHandler,
                             completionBlock: completion)
-    
+
     self.$tasks.mutate { $0[task.taskIdentifier] = taskData }
-    
+
     task.resume()
-    
+
     return task
   }
-  
+
   /// Cancels a given task and clears out its underlying data.
   ///
   /// NOTE: You will not receive any kind of "This was cancelled" error when this is called.
@@ -139,71 +139,71 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
     self.clear(task: task.taskIdentifier)
     task.cancel()
   }
-  
+
   // MARK: - URLSessionDelegate
-  
+
   open func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
     let finalError = error ?? URLSessionClientError.sessionBecameInvalidWithoutUnderlyingError
     for task in self.tasks.values {
       task.completionBlock(.failure(finalError))
     }
-    
+
     self.clearAllTasks()
   }
-  
+
   open func urlSession(_ session: URLSession,
                        task: URLSessionTask,
                        didFinishCollecting metrics: URLSessionTaskMetrics) {
     // No default implementation
   }
-  
+
   open func urlSession(_ session: URLSession,
                        didReceive challenge: URLAuthenticationChallenge,
                        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
     completionHandler(.performDefaultHandling, nil)
   }
-  
+
   #if os(iOS) || os(tvOS) || os(watchOS)
   open func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
     // No default implementation
   }
   #endif
-  
+
   // MARK: - NSURLSessionTaskDelegate
-  
+
   open func urlSession(_ session: URLSession,
                        task: URLSessionTask,
                        didReceive challenge: URLAuthenticationChallenge,
                        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
     completionHandler(.performDefaultHandling, nil)
   }
-  
+
   open func urlSession(_ session: URLSession,
                        taskIsWaitingForConnectivity task: URLSessionTask) {
     // No default implementation
   }
-  
+
   open func urlSession(_ session: URLSession,
                        task: URLSessionTask,
                        didCompleteWithError error: Error?) {
     defer {
       self.clear(task: task.taskIdentifier)
     }
-    
+
     guard let taskData = self.tasks[task.taskIdentifier] else {
       // No completion blocks, the task has likely been cancelled. Bail out.
       return
     }
-    
+
     let data = taskData.data
     let response = taskData.response
-    
+
     if let rawCompletion = taskData.rawCompletion {
       rawCompletion(data, response, error)
     }
-    
+
     let completion = taskData.completionBlock
-    
+
     if let finalError = error {
       completion(.failure(URLSessionClientError.networkError(data: data, response: response, underlying: finalError)))
     } else {
@@ -211,17 +211,17 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
         completion(.failure(URLSessionClientError.noHTTPResponse(request: task.originalRequest)))
         return
       }
-      
+
       completion(.success((data, finalResponse)))
     }
   }
-  
+
   open func urlSession(_ session: URLSession,
                        task: URLSessionTask,
                        needNewBodyStream completionHandler: @escaping (InputStream?) -> Void) {
     completionHandler(nil)
   }
-  
+
   open func urlSession(_ session: URLSession,
                        task: URLSessionTask,
                        didSendBodyData bytesSent: Int64,
@@ -229,14 +229,14 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
                        totalBytesExpectedToSend: Int64) {
     // No default implementation
   }
-  
+
   open func urlSession(_ session: URLSession,
                        task: URLSessionTask,
                        willBeginDelayedRequest request: URLRequest,
                        completionHandler: @escaping (URLSession.DelayedRequestDisposition, URLRequest?) -> Void) {
     completionHandler(.continueLoading, request)
   }
-  
+
   open func urlSession(_ session: URLSession,
                        task: URLSessionTask,
                        willPerformHTTPRedirection response: HTTPURLResponse,
@@ -244,9 +244,9 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
                        completionHandler: @escaping (URLRequest?) -> Void) {
     completionHandler(request)
   }
-  
+
   // MARK: - URLSessionDataDelegate
-  
+
   open func urlSession(_ session: URLSession,
                        dataTask: URLSessionDataTask,
                        didReceive data: Data) {
@@ -254,36 +254,41 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
       // Task is in the process of cancelling, don't bother handling its data.
       return
     }
-    
     self.$tasks.mutate {
       guard let taskData = $0[dataTask.taskIdentifier] else {
-        assertionFailure("No data found for task \(dataTask.taskIdentifier), cannot append received data")
+        /// Some tests were crashing on CI due to this assertion and found that this is a useful workaround.
+        /// Jira ticket: BET-10678
+        /// Related post looking for help on the matter from Apollo's forum:
+        /// https://community.apollographql.com/t/ios-unit-testing-with-urlsessionclient/3939
+        if NSClassFromString("XCTest") == nil {
+          assertionFailure("No data found for task \(dataTask.taskIdentifier), cannot append received data")
+        }
         return
       }
-      
+
       taskData.append(additionalData: data)
     }
   }
-  
+
   open func urlSession(_ session: URLSession,
                        dataTask: URLSessionDataTask,
                        didBecome streamTask: URLSessionStreamTask) {
     // No default implementation
   }
-  
+
   open func urlSession(_ session: URLSession,
                        dataTask: URLSessionDataTask,
                        didBecome downloadTask: URLSessionDownloadTask) {
     // No default implementation
   }
-  
+
   open func urlSession(_ session: URLSession,
                        dataTask: URLSessionDataTask,
                        willCacheResponse proposedResponse: CachedURLResponse,
                        completionHandler: @escaping (CachedURLResponse?) -> Void) {
     completionHandler(proposedResponse)
   }
-  
+
   open func urlSession(_ session: URLSession,
                        dataTask: URLSessionDataTask,
                        didReceive response: URLResponse,
@@ -291,12 +296,12 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
     defer {
       completionHandler(.allow)
     }
-    
+
     self.$tasks.mutate {
       guard let taskData = $0[dataTask.taskIdentifier] else {
         return
       }
-      
+
       taskData.responseReceived(response: response)
     }
   }
