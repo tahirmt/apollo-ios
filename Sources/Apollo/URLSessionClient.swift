@@ -264,6 +264,7 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
           print("Alex - XCTest == nil")
           assertionFailure("No data found for task \(dataTask.taskIdentifier), cannot append received data")
         }
+        print("Alex - outside")
         return
       }
       
