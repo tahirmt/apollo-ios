@@ -261,6 +261,7 @@ open class URLSessionClient: NSObject, URLSessionDelegate, URLSessionTaskDelegat
     self.tasks.mutate {
       guard let taskData = $0[dataTask.taskIdentifier] else {
         /// Some tests were crashing on CI due to this assertion and found that this is a useful workaround.
+        /// Jira ticket: BET-10678
         /// Related post looking for help on the matter from Apollo's forum:
         /// https://community.apollographql.com/t/ios-unit-testing-with-urlsessionclient/3939
         if NSClassFromString("XCTest") == nil {
